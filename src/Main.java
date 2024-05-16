@@ -8,7 +8,8 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
         Connexion.seConecter();
         Pays.ajouterPays(Connexion.con, scanner);
-        System.out.println("Hello Yalcouyé");
+
+        System.out.println("Hello Amadou!");
     }
 
     private void InscriptionPassager() throws SQLException {
