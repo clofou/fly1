@@ -7,6 +7,6 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
         Connexion.seConecter();
         Pays.ajouterPays(Connexion.con, scanner);
-        System.out.println("Hello world!");
+        System.out.println("Hello Amadou!");
     }
 }
