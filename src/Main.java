@@ -2,15 +2,16 @@ import models.*;
 import java.sql.SQLException;
 import java.util.Scanner;
 import org.mindrot.jbcrypt.BCrypt;
-import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) throws SQLException {
         Scanner scanner = new Scanner(System.in);
         Connexion.seConecter();
 
+        Reservation r = new Reservation();
+        r.EffecuterReservation();
 
-
+        System.out.println("Hello Amadou!");
     }
 
     private void InscriptionPassager() throws SQLException {
@@ -39,6 +40,7 @@ public class Main {
         // Instanciation du passager
         Passager passager = new Passager(nom, prenom, email, numTelephone, DateNaissance, motDePasseHasher);
         passager.inscription();
+
     }
 
     private void ConnexionPassager(){
@@ -52,6 +54,7 @@ public class Main {
 
         Passager passager = new Passager(null,null,email,null,null,HashermotDePasseFourni);
         passager.seConnecter(email, motDePasse);
+
     }
 
 
