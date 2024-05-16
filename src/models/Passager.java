@@ -7,6 +7,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import org.mindrot.jbcrypt.BCrypt;
+
 public class Passager extends Personne {
     private int idPassager;
 
@@ -24,36 +26,16 @@ public class Passager extends Personne {
             e.printStackTrace();
         }
         return idPassager;
-        
+
     }
 
     public void setIdPassager(int idPassager) {
         this.idPassager = idPassager;
     }
     private int getPassager(Connection connection) throws SQLException{
-         // Préparer la requête SQL
-         String sql = "SELECT idPersonne FROM Personne WHERE email='"+getEmail()+"'";
-         int idPersonne = 0;
-         try (Statement statement = connection.createStatement();
-              ResultSet resultSet = statement.executeQuery(sql)) {
- 
-             // Vérifier si le ResultSet contient des données
-             if (resultSet.next()) {
-                 // Récupérer la valeur unique
-                 idPersonne = resultSet.getInt("idPersonne");
- 
-                 // Utiliser la valeur récupérée
-                 // ... votre code ici pour utiliser la valeur 'nomUtilisateur'
-             } else {
-                 System.out.println("Aucune donnée trouvée.");
-             }
-         }
-         return idPersonne;
-    }
-    private static int recupererValeurUnique(Connection connection) throws SQLException {
         // Préparer la requête SQL
-        String sql = "SELECT idPersonne FROM Personne ORDER BY idPersonne DESC LIMIT 1";
-		int idPersonne = 0;
+        String sql = "SELECT idPersonne FROM Personne WHERE email='"+getEmail()+"'";
+        int idPersonne = 0;
         try (Statement statement = connection.createStatement();
              ResultSet resultSet = statement.executeQuery(sql)) {
 
@@ -68,17 +50,37 @@ public class Passager extends Personne {
                 System.out.println("Aucune donnée trouvée.");
             }
         }
-		return idPersonne;
+        return idPersonne;
+    }
+    private static int recupererValeurUnique(Connection connection) throws SQLException {
+        // Préparer la requête SQL
+        String sql = "SELECT idPersonne FROM Personne ORDER BY idPersonne DESC LIMIT 1";
+        int idPersonne = 0;
+        try (Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(sql)) {
+
+            // Vérifier si le ResultSet contient des données
+            if (resultSet.next()) {
+                // Récupérer la valeur unique
+                idPersonne = resultSet.getInt("idPersonne");
+
+                // Utiliser la valeur récupérée
+                // ... votre code ici pour utiliser la valeur 'nomUtilisateur'
+            } else {
+                System.out.println("Aucune donnée trouvée.");
+            }
+        }
+        return idPersonne;
     }
 
     public void inscription() throws SQLException {
         String insertionPersonneQuery = "INSERT INTO Personne (nom, prenom, email, numeroDeTelephone, dateDeNaissance, motDePasse) " +
-                                        "VALUES (?, ?, ?, ?, ?, ?)";
+                "VALUES (?, ?, ?, ?, ?, ?)";
         String insertionPassagerQuery = "INSERT INTO Passager (idPassager, idPersonne) VALUES (?, ?)";
 
         try (
-            PreparedStatement personneStatement = Connexion.con.prepareStatement(insertionPersonneQuery);
-            PreparedStatement passagerStatement = Connexion.con.prepareStatement(insertionPassagerQuery)) {
+                PreparedStatement personneStatement = Connexion.con.prepareStatement(insertionPersonneQuery);
+                PreparedStatement passagerStatement = Connexion.con.prepareStatement(insertionPassagerQuery)) {
 
             // Insérer dans la table Personne
             personneStatement.setString(1, getNom());
@@ -93,13 +95,13 @@ public class Passager extends Personne {
 
             // Insérer dans la table Passager
             try {
-                
+
                 passagerStatement.setInt(1, recupererValeurUnique(Connexion.con));
                 passagerStatement.setInt(2, recupererValeurUnique(Connexion.con));
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-            
+
 
             passagerStatement.executeUpdate();
 
@@ -114,10 +116,10 @@ public class Passager extends Personne {
 
     public void faireReservation(Date dateReservation, int nombreDePassager, String statut) throws SQLException {
         String insereReservation = "INSERT INTO Reservation (idPassager, dateReservation, nombreDePassager, status) " +
-                                "VALUES (?, ?, ?, ?)";
+                "VALUES (?, ?, ?, ?)";
 
         try (Connection connection = Connexion.con;
-            PreparedStatement reservationStatement = connection.prepareStatement(insereReservation)) {
+             PreparedStatement reservationStatement = connection.prepareStatement(insereReservation)) {
 
             // Insérer la réservation dans la base de données
             reservationStatement.setInt(1, getIdPassager());
@@ -140,7 +142,7 @@ public class Passager extends Personne {
         String modificationQuery = "UPDATE Reservation SET status = ? WHERE idReservation = ? AND idPassager = ?";
 
         try (Connection connection = Connexion.con;
-            PreparedStatement statement = connection.prepareStatement(modificationQuery)) {
+             PreparedStatement statement = connection.prepareStatement(modificationQuery)) {
 
             // Paramètres pour la modification de la réservation
             statement.setString(1, nouveauStatut);
@@ -166,7 +168,7 @@ public class Passager extends Personne {
         String verificationQuery = "SELECT status FROM Reservation WHERE idReservation = ? AND idPassager = ?";
 
         try (Connection connection = Connexion.con;
-            PreparedStatement statement = connection.prepareStatement(verificationQuery)) {
+             PreparedStatement statement = connection.prepareStatement(verificationQuery)) {
 
             // Paramètres pour la vérification du statut de la réservation
             statement.setInt(1, idReservation);
@@ -188,22 +190,31 @@ public class Passager extends Personne {
     }
 
     public boolean seConnecter(String email, String motDePasse) {
-        String selectPassagerQuery = "SELECT idPersonne FROM Personne WHERE email = ? AND motDePasse = ?";
+        String selectPassagerQuery = "SELECT idPersonne, motDePasse FROM Personne WHERE email = ?";
+
         try (Connection connection = Connexion.con;
-            PreparedStatement statement = connection.prepareStatement(selectPassagerQuery)) {
-            // Paramètres pour la requête SELECT
+             PreparedStatement statement = connection.prepareStatement(selectPassagerQuery)) {
+
+            // Paramètre pour la requête SELECT
             statement.setString(1, email);
-            statement.setString(2, motDePasse);
 
             // Exécution de la requête SELECT
             try (ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
-                    int idPersonne = resultSet.getInt("idPersonne");
-                    System.out.println("Vous êtes connecté en tant que passager (ID : " + idPersonne + ")");
-                    return true; // Connexion réussie
+                    String motDePasseBD = resultSet.getString("motDePasse");
+
+                    // Vérifier le mot de passe haché avec BCrypt
+                    if (BCrypt.checkpw(motDePasse, motDePasseBD)) {
+                        int idPersonne = resultSet.getInt("idPersonne");
+                        System.out.println("Vous êtes connecté en tant que passager (ID : " + idPersonne + ")");
+                        return true; // Connexion réussie
+                    } else {
+                        System.out.println("Identifiants incorrects. Connexion échouée.");
+                        return false; // Mot de passe incorrect
+                    }
                 } else {
-                    System.out.println("Identifiants incorrects. Connexion échouée.");
-                    return false; // Connexion échouée (identifiants incorrects)
+                    System.out.println("Adresse e-mail non trouvée. Connexion échouée.");
+                    return false; // Adresse e-mail non trouvée dans la base de données
                 }
             }
         } catch (SQLException e) {
