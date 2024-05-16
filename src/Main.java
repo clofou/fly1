@@ -8,7 +8,8 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
         Connexion.seConecter();
 
-        Pays.ajouterPays(Connexion.con, scanner);
+        Reservation r = new Reservation();
+        r.EffecuterReservation();
 
         System.out.println("Hello Amadou!");
     }
@@ -53,6 +54,7 @@ public class Main {
 
         Passager passager = new Passager(null,null,email,null,null,HashermotDePasseFourni);
         passager.seConnecter(email, motDePasse);
+
     }
 
 
