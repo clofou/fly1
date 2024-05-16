@@ -7,6 +7,7 @@ public class Main {
     public static void main(String[] args) throws SQLException {
         Scanner scanner = new Scanner(System.in);
         Connexion.seConecter();
+
         Pays.ajouterPays(Connexion.con, scanner);
 
         System.out.println("Hello Amadou!");
@@ -38,6 +39,7 @@ public class Main {
         // Instanciation du passager
         Passager passager = new Passager(nom, prenom, email, numTelephone, DateNaissance, motDePasseHasher);
         passager.inscription();
+
     }
 
     private void ConnexionPassager(){
