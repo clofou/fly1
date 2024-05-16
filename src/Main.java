@@ -8,9 +8,8 @@ public class Main {
     public static void main(String[] args) throws SQLException {
         Scanner scanner = new Scanner(System.in);
         Connexion.seConecter();
-
-
-
+        Pays.ajouterPays(Connexion.con, scanner);
+        System.out.println("Hello Yalcouyé");
     }
 
     private void InscriptionPassager() throws SQLException {
