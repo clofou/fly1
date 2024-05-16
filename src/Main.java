@@ -8,9 +8,8 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
         Connexion.seConecter();
 
-        Reservation r = new Reservation();
-        r.EffecuterReservation();
-
+        //Pays.ajouterPays(Connexion.con, scanner);
+        Ville.ajouterUneVille();
         System.out.println("Hello Amadou!");
     }
 
