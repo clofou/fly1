@@ -5,6 +5,7 @@ import java.util.Scanner;
 import org.mindrot.jbcrypt.BCrypt;
 
 public class util {
+
     //Methode pour obtenir la date sous format AAAA-MM-JJ
     public static String Date(){
         Scanner entree = new Scanner(System.in);

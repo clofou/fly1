@@ -8,6 +8,8 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
         Connexion.seConecter();
 
+        Vol.ajouterVol(Connexion.con, scanner);
+
         Reservation r = new Reservation();
         r.EffecuterReservation();
 
