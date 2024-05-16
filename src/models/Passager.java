@@ -52,26 +52,6 @@ public class Passager extends Personne {
         }
         return idPersonne;
     }
-    private static int recupererValeurUnique(Connection connection) throws SQLException {
-        // Préparer la requête SQL
-        String sql = "SELECT idPersonne FROM Personne ORDER BY idPersonne DESC LIMIT 1";
-        int idPersonne = 0;
-        try (Statement statement = connection.createStatement();
-             ResultSet resultSet = statement.executeQuery(sql)) {
-
-            // Vérifier si le ResultSet contient des données
-            if (resultSet.next()) {
-                // Récupérer la valeur unique
-                idPersonne = resultSet.getInt("idPersonne");
-
-                // Utiliser la valeur récupérée
-                // ... votre code ici pour utiliser la valeur 'nomUtilisateur'
-            } else {
-                System.out.println("Aucune donnée trouvée.");
-            }
-        }
-        return idPersonne;
-    }
 
     public void inscription() throws SQLException {
         String insertionPersonneQuery = "INSERT INTO Personne (nom, prenom, email, numeroDeTelephone, dateDeNaissance, motDePasse) " +
@@ -91,13 +71,12 @@ public class Passager extends Personne {
             personneStatement.setString(6, getMotDePasse());
 
             personneStatement.executeUpdate();
-            System.out.println(recupererValeurUnique(Connexion.con));
+            System.out.println(util.recupererValeurUnique(Connexion.con));
 
             // Insérer dans la table Passager
             try {
-
-                passagerStatement.setInt(1, recupererValeurUnique(Connexion.con));
-                passagerStatement.setInt(2, recupererValeurUnique(Connexion.con));
+                passagerStatement.setInt(1, util.recupererValeurUnique(Connexion.con));
+                passagerStatement.setInt(2, util.recupererValeurUnique(Connexion.con));
             } catch (SQLException e) {
                 e.printStackTrace();
             }
