@@ -76,22 +76,37 @@ public class Pays {
         }
     }
 
-    public static void listeDePays(Connection connection) throws SQLException{
+    public static void listeDePays(Connection connection) throws SQLException {
         System.out.println("\n");
         // Create a statement object
         try (Statement statement = connection.createStatement();
              // Create the SQL query to retrieve the entire column list
-             ResultSet resultSet = statement.executeQuery("SELECT idPays, nom FROM Pays")) {
+             ResultSet resultSet = statement.executeQuery("SELECT idPays, nom FROM pays")) {
 
             // Iterate through the result set and print each value
             while (resultSet.next()) {
                 String idPays = resultSet.getString("idPays");
                 String nomPays = resultSet.getString("nom");
 
-                System.out.print(idPays + "- ");
+                System.out.print(idPays + " - ");
                 System.out.println(nomPays);
             }
         }
         System.out.println("\n\n");
+    }
+
+    public static void afficherTousLesIds(Connection connection) throws SQLException {
+        System.out.println("Liste des IDs des pays :");
+        String sql = "SELECT idPays FROM pays";
+        try (Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(sql)) {
+
+            while (resultSet.next()) {
+                int idPays = resultSet.getInt("idPays");
+                System.out.println(idPays);
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
     }
 }
