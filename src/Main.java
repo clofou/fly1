@@ -6,7 +6,8 @@ public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         Connexion.seConecter();
-        Pays.ajouterPays(Connexion.con, scanner);
+       // Pays.ajouterPays(Connexion.con, scanner);
+        Vol.ajouterVol(Connexion.con,scanner);
         System.out.println("Hello Fakoro!");
     }
 }
