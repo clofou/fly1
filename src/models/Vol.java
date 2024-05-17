@@ -10,6 +10,7 @@ import java.util.Scanner;
 public class Vol {
 
     private int idVol;
+    private String immatriculation;
     private String villeDeDepart;
     private String villeDArrive;
     private Date dateDeDepart;
@@ -18,11 +19,21 @@ public class Vol {
     private int tarif;
 
     public Vol(int idVol, String villeDeDepart, String villeDArrive, Date dateDeDepart, Date dateDArrive){
+        this.immatriculation = immatriculation;
         this.idVol = idVol;
         this.villeDeDepart = villeDeDepart;
         this.villeDArrive = villeDArrive;
         this.dateDeDepart = dateDeDepart;
         this.dateDArrive = dateDArrive;
+    }
+
+
+    public String getImmatriculation() {
+        return immatriculation;
+    }
+
+    public void setImmatriculation(String immatriculation) {
+        this.immatriculation = immatriculation;
     }
 
     public int getIdVol() {
@@ -109,7 +120,7 @@ public class Vol {
                 System.out.print(villeDArrive + "  ");
                 System.out.print(dateDeDepart + " ");
                 System.out.print("nbreEscale:"+nombreDEscale + " ");
-                System.out.println("tarif:"+tarif+"euros");
+                System.out.println("tarif:"+tarif+"cfa");
             }
         }
     }
@@ -355,4 +366,5 @@ public class Vol {
 
         return vols;
     }
+
 }
