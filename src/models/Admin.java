@@ -112,19 +112,19 @@ public class Admin extends Personne {
                     if (BCrypt.checkpw(motDePasse, motDePasseBD)) {
                         int idPersonne = resultSet.getInt("idPersonne");
                         System.out.println("Vous êtes connecté en tant qu'admin (ID : " + idPersonne + ")");
-                        return true; // Connexion réussie
+                        return idPersonne; // Connexion réussie
                     } else {
                         System.out.println("Identifiants incorrects. Connexion échouée.");
-                        return false; // Mot de passe incorrect
+                        return -1; // Mot de passe incorrect
                     }
                 } else {
                     System.out.println("Adresse e-mail non trouvée. Connexion échouée.");
-                    return false; // Adresse e-mail non trouvée dans la base de données
+                    return -1; // Adresse e-mail non trouvée dans la base de données
                 }
             }
         } catch (SQLException e) {
             System.err.println("Erreur lors de la connexion : " + e.getMessage());
-            return false; // Connexion échouée en raison d'une exception SQL
+            return -1; // Connexion échouée en raison d'une exception SQL
         }
     }
 }

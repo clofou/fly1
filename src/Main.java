@@ -8,7 +8,8 @@ public class Main {
     public static void main(String[] args) throws SQLException {
         Scanner scanner = new Scanner(System.in);
         Connexion.seConecter();
-        //AdminAjoutCompagnie();
+        int IdPassager = ConnexionPassager();
+        System.out.println("l'Id du passager connecter est : "+ IdPassager);
     }
 
     private void InscriptionPassager() throws SQLException {
@@ -39,7 +40,7 @@ public class Main {
         passager.inscription();
     }
 
-    private void ConnexionPassager(){
+    private static int ConnexionPassager(){
         // Connexion du passager à la base de données
         Scanner entree = new Scanner(System.in);
         System.out.println("Pour vous connecter Veuillez donner votre E-mail : ");
@@ -49,7 +50,7 @@ public class Main {
         String HashermotDePasseFourni = BCrypt.hashpw(motDePasse, BCrypt.gensalt());
 
         Passager passager = new Passager(null,null,email,null,null,HashermotDePasseFourni);
-        passager.seConnecter(email, motDePasse);
+        return passager.seConnecter(email, motDePasse);
     }
 
     private static void ajouterUnAdministrateur() throws SQLException {
@@ -82,7 +83,7 @@ public class Main {
         admin.ajoutAdmin();
     }
 
-    private static boolean ConnexionAdmin(){
+    private static int ConnexionAdmin(){
         // Connexion de l'admin à la base de données
         Scanner entree = new Scanner(System.in);
         System.out.println("Pour vous connecter en tant que Admin, veuillez donner votre E-mail : ");
@@ -93,9 +94,10 @@ public class Main {
 
         Admin admin = new Admin(null,null,email,null,null,HashermotDePasseFourni);
         //admin.seConnecter(email, motDePasse);
-        if (admin.seConnecter(email, motDePasse)){
-            return true;
-        }else return false;
+        int connexionAdminReussieIdPersonne = admin.seConnecter(email, motDePasse);
+        if (connexionAdminReussieIdPersonne!=-1){
+            return connexionAdminReussieIdPersonne;
+        }else return -1;
 
     }
 }
