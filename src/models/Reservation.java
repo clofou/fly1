@@ -5,6 +5,8 @@ import java.util.Scanner;
 
 import models.Connexion;
 
+import static utils.Date.lireDateValide;
+
 public class Reservation {
 	private int id_passager;
 	private String date_reservation;
@@ -42,16 +44,16 @@ public class Reservation {
 		String sql="INSERT INTO reservation(idPassager,dateReservation,nombreDePassager) values(?,?,?)";
 
 		Reservation r=new Reservation();
-		System.out.println("renseignez les information concernant la reservation. \n");
+		System.out.println("----- Renseignez les informations concernant la reservation. -----\n");
 		r.setId_passager(id_passager);
-		System.out.println("CHOISISEZ la ville de Depart :");
+		System.out.print("CHOISISEZ la ville de Depart : ");
 		String villeDepa = c.next();
-		System.out.println("CHOISISEZ la ville D'arrive :");
+		System.out.print("CHOISISEZ la ville D'arrive : ");
 		String villeDArrive = c.next();
-		System.out.println("CHOISISEZ la date :");
-		r.setDate_reservation(util.Date());
-		System.out.println("Vous voulez reserver pour combien de place ?");
-
+		System.out.println("CHOISISEZ la date");
+		String dateValide = lireDateValide();
+		r.setDate_reservation(new utils.Date(dateValide).formatAnglais());
+		System.out.print("Vous voulez reserver pour combien de place ? ");
 
 
 		boolean bool=false;
@@ -60,25 +62,28 @@ public class Reservation {
 				r.setNbre_de_passager(c.nextInt());
 				bool= true;
 			}
-
-
 			else {
-				System.out.println("Entrer une un entier : ");
+				System.out.println("Entrer un entier : ");
 				bool =false;
 				c.next();
-			} }
+			}
+		}
 
 		int a=r.getNbre_de_passager();
+		// Affiche La liste des Vols Correspondants
 		Vol.volDispoAUneDate(Connexion.con, r.getDate_reservation(),a,villeDepa, villeDArrive);
+
+		Infopassager i=new Infopassager();
+		System.out.print("Choisissez votre numero vol : ");
+		i.setIdVol(c.nextInt());
 
 		if(a>0) {
 			try {
-
 				Connexion.seConecter();
 				PreparedStatement ps=Connexion.con.prepareStatement(sql);
 				ps.setInt(1, r.getId_passager());ps.setString(2, r.getDate_reservation());
 				ps.setInt(3, r.getNbre_de_passager());ps.execute();
-				System.out.println("Reservation Effectuee Maintenant renseigner les infos des autre voyageurs \n :");
+				System.out.println("Reservation Effectuee Maintenant renseigner les infos des voyageurs: \n");
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -87,19 +92,21 @@ public class Reservation {
 			String rq="INSERT INTO infopassager(idReservation,idVol,idCategorie,nomPassagerEtranger,prenomPassagerEtranger,numeroPasseport) "
 					+ "values(?,?,?,?,?,?)";
 			for(int j=1;j<= a;j++) {
-				Infopassager i=new Infopassager();
+
 				System.out.println("Enregistrer la personne "+j +"\n");
-				System.out.println("Choisissez votre numero reservation :");
-				i.setIdReservation(c.nextInt());
-				System.out.println("Choisissez votre numero numero vol :");
-				i.setIdVol(c.nextInt());
+
+				i.setIdReservation(recupererIdReservation(Connexion.con));
+
 				System.out.println("Choisissez la categorie de reservation :");
+				System.out.print("Categorie: ");
+				Categorie.listeDeCategorie(Connexion.con);
+
 				i.setIdCategorie(c.nextInt());
-				System.out.println("Saiisissez la nom : ");
+				System.out.print("Saisissez la nom : ");
 				i.setNomPassagerEtranger(c.next());
-				System.out.println("Saisissez le prenom : ");
+				System.out.print("Saisissez le prenom : ");
 				i.setPrenomPassagerEtranger(c.next());
-				System.out.println("Entrer le numero du passe-port : ");
+				System.out.print("Entrer le numero du passe-port : ");
 				i.setNumeroPasseport(c.next());
 				try {
 					Connexion.seConecter();
@@ -112,14 +119,14 @@ public class Reservation {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				System.out.println("Voulez-vous payer ???? : ");
-				String b =c.next();
 
-				if(b.equals("oui")) {
-
-				}
 			}
+			System.out.println("Voulez-vous payer ???? : ");
+			String b =c.next();
 
+			if(b.equals("oui")) {
+
+			}
 
 
 		}

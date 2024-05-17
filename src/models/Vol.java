@@ -97,7 +97,7 @@ public class Vol {
         // Create a statement object
         try (Statement statement = connection.createStatement();
              // Create the SQL query to retrieve the entire column list
-             ResultSet resultSet = statement.executeQuery("SELECT idVol, villeDeDepart, villeDArrive, dateDeDepart, nombreDEscale, modele, tarif, capacite, immatriculation FROM Vol NATURAL JOIN Avion WHERE dateDeDepart='"+date+"' AND capacite>="+nbreDePlace+" AND villeDeDepart='"+villeDeDepar+"' AND villeDArrive='"+villeDArriv+"'")) {
+             ResultSet resultSet = statement.executeQuery("SELECT idVol, villeDeDepart, villeDArrive, dateDeDepart, nombreDEscale, modele, tarif, capacite, immatriculation, COUNT(*) i FROM Vol NATURAL JOIN Avion NATURAL JOIN infopassager i WHERE dateDeDepart='"+date+"'AND villeDeDepart='"+villeDeDepar+"' AND villeDArrive='"+villeDArriv+"'")) {
 
             // Iterate through the result set and print each value
             
@@ -112,6 +112,7 @@ public class Vol {
                 int nombreDEscale = resultSet.getInt("nombreDEscale");
                 int tarif = resultSet.getInt("tarif");
                 String immatriculation = resultSet.getString("immatriculation");
+                int placeDispo=(resultSet.getInt("capacite")-resultSet.getInt("i"));
                 
                 System.out.print("	");
                 System.out.print("matricule: "+immatriculation + "  ");
@@ -120,7 +121,9 @@ public class Vol {
                 System.out.print(villeDArrive + "  ");
                 System.out.print(dateDeDepart + " ");
                 System.out.print("nbreEscale:"+nombreDEscale + " ");
-                System.out.println("tarif:"+tarif+"cfa");
+                System.out.print("tarif:"+tarif+"cfa  ");
+                System.out.println(placeDispo+" places disponible");
+
             }
         }
     }
