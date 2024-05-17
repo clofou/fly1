@@ -59,8 +59,8 @@ public class util {
             if (entree.hasNextInt()) {
                 anneeNaissance = entree.nextInt();
                 isIntAnnee = true;
-                if (anneeNaissance > 2024) {
-                    System.out.println("Veuillez donner un nombre inférieur ou égal à 2024");
+                if (anneeNaissance > 3000) {
+                    System.out.println("Veuillez donner un nombre inférieur ou égal à 3000");
                     isIntAnnee = false;
                 }
             } else {

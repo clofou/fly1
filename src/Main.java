@@ -1,9 +1,6 @@
 import models.*;
 import org.mindrot.jbcrypt.BCrypt;
-
-
-
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.Scanner;
 
 public class Main {
@@ -11,10 +8,7 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
         Connexion.seConecter();
 
-
         Vol.ajouterVol(Connexion.con, scanner);
-
-
 
 
         int IdPassager = ConnexionPassager();
@@ -22,6 +16,7 @@ public class Main {
 
         Reservation r = new Reservation();
         r.EffecuterReservation(IdPassager);
+
     }
 
     private static void InscriptionPassager() throws SQLException {
@@ -41,6 +36,7 @@ public class Main {
         System.out.println("Votre numero de telephone :");
         String numTelephone = entree.nextLine();
         //Date de Naissance
+        System.out.println("Votre date de naissance");
         String DateNaissance = util.Date();
         //Mot de Passe
         System.out.println("Donnez un mot de passe :");
@@ -109,5 +105,86 @@ public class Main {
             return connexionAdminReussieIdPersonne;
         }else return -1;
 
+    }
+
+    //Les details de reservation effectuer par un passager
+    public void detailReservation (){
+        int IdPassager = ConnexionPassager();
+        if (IdPassager != -1) {
+            String listeReservationIdPersonne = "SELECT r.idReservation, r.dateReservation, r.nombreDePassager, p.idPaiement,\n" +
+                    "                p.montant,\n" +
+                    "                p.modePaiement,\n" +
+                    "                p.datePaiement,\n" +
+                    "                i.id,\n" +
+                    "                i.nomPassagerEtranger,\n" +
+                    "                i.prenomPassagerEtranger,\n" +
+                    "                i.numeroPasseport,\n" +
+                    "                v.idVol,\n" +
+                    "                v.immatriculation,\n" +
+                    "                v.villeDeDepart,\n" +
+                    "                v.villeDArrive,\n" +
+                    "                v.dateDeDepart,\n" +
+                    "                v.dateDArrive,\n" +
+                    "                v.nombreDEscale,\n" +
+                    "                v.tarif,\n" +
+                    "                c.idCategorie,\n" +
+                    "                c.nom AS nomCategorie\n" +
+                    "        FROM\n" +
+                    "        reservation r\n" +
+                    "        JOIN\n" +
+                    "        infopassager i ON r.idReservation = i.idReservation\n" +
+                    "        JOIN\n" +
+                    "        vol v ON i.idVol = v.idVol\n" +
+                    "        LEFT JOIN\n" +
+                    "        paiement p ON r.idReservation = p.idReservation\n" +
+                    "        LEFT JOIN\n" +
+                    "        categorie c ON i.idCategorie = c.idCategorie\n" +
+                    "        WHERE\n" +
+                    "        r.idPassager = ?;";
+
+            try (PreparedStatement statement = Connexion.con.prepareStatement(listeReservationIdPersonne)) {
+
+                // Paramètre pour la requête SELECT
+                statement.setInt(1, IdPassager);
+
+                // Exécution de la requête SELECT
+                try (ResultSet resultSet = statement.executeQuery()) {
+                    if (resultSet.next()) {
+                        int idReservation = resultSet.getInt("r.idReservation");
+                        String dateReservation = resultSet.getString("r.dateReservation");
+                        int nombreDePassager = resultSet.getInt("r.nombreDePassager");
+                        int idPaiement = resultSet.getInt("p.idPaiement");
+                        int montant = resultSet.getInt("p.montant");
+                        String modePaiement = resultSet.getString("p.modePaiement");
+                        String datePaiement = resultSet.getString("p.datePaiement");
+                        int id = resultSet.getInt("i.id");
+                        String nomPassagerEtranger = resultSet.getString("i.nomPassagerEtranger");
+                        String prenomPassagerEtranger = resultSet.getString("i.prenomPassagerEtranger");
+                        int numeroPasseport = resultSet.getInt("i.numeroPasseport");
+                        int idVol = resultSet.getInt("v.idVol");
+                        String immatriculation = resultSet.getString("v.immatriculation");
+                        String villeDeDepart = resultSet.getString("v.villeDeDepart");
+                        String villeDArrive = resultSet.getString("v.villeDArrive");
+                        String dateDeDepart = resultSet.getString("v.dateDeDepart");
+                        String dateDArrive = resultSet.getString("v.dateDArrive");
+                        int nombreDEscale = resultSet.getInt("v.nombreDEscale");
+                        int tarif = resultSet.getInt("v.tarif");
+                        int idCategorie = resultSet.getInt("c.idCategorie");
+                        String nom = resultSet.getString("c.nom");
+
+                        System.out.println("Les details de resevation du passager "+IdPassager+"sont :");
+                        System.out.printf("ID Reservation : "+idReservation+"\n" +
+                                "Date Reservation : "+dateReservation+"\n" +
+                                "");
+                    } else {
+                        System.out.println("Pas de reservation disponible pour l'ID :"+IdPassager);
+                    }
+                }
+            } catch (SQLException e) {
+                System.err.println("Erreur lors de la connexion : " + e.getMessage());
+            }
+
+
+        }
     }
 }
