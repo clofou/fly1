@@ -6,7 +6,12 @@ public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         Connexion.seConecter();
-        Pays.ajouterPays(Connexion.con, scanner);
-        System.out.println("Hello world!");
+        //Pays.ajouterPays(Connexion.con, scanner);
+       // System.out.println("Hello Kalifa!");
+
+        Avion a = new Avion();
+        //a.AjouterAvions();
+        //a.ModifierAvions();
+        //a.SupprimerAvion();
     }
 }

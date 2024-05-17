@@ -37,10 +37,103 @@ public class Avion {
 	private void setIdCompagnie(int idCompagnie) {
 		this.idCompagnie = idCompagnie;
 	}
-	
-	public static void main(String[] args) {
+
+
+	public static void AjouterAvions() {
 		Avion a=new Avion();
-		a.AjouterAvions();
+		try (Scanner c = new Scanner(System.in)) {
+			System.out.println("Entrez l'immatriculation de l'avion : ");
+			a.setImmatriculation(c.next());
+			System.out.println("Entrez le model de l'avion : ");
+			a.setModele(c.next());
+
+			System.out.println("Quel est le nombre de places dans l'avion : ");
+
+			boolean entreeValide = false;
+			while (!entreeValide) {
+				if (c.hasNextInt()) {
+					int nombreDePlaces = c.nextInt();
+					if (nombreDePlaces > 0) {
+						a.setCapacite(nombreDePlaces);
+						System.out.println("Nombre de places dans l'avion: " + nombreDePlaces);
+						entreeValide = true;
+					} else {
+						System.out.println("Veuillez entrer un nombre supérieur à 0.");
+					}
+				} else {
+					System.out.println("Veuillez entrer un nombre entier.");
+					c.next(); // Pour vider le buffer
+				}
+			}
+
+			/* while (!entreeValide) {
+				if (c.hasNextInt()) {
+					 a.setCapacite(c.nextInt());
+					 entreeValide = true;
+				} else {
+					System.out.println("Veuillez entrer un nombre entier.");
+					c.next(); // Pour vider le buffer
+				}
+			} */
+
+
+			System.out.println("Entrez l'identifiant de la compagnie : ");
+			a.setIdCompagnie(c.nextInt());
+		}
+
+		String sql="INSERT INTO Avion VALUES(?,?,?,?)";
+		Connexion.seConecter();
+		try {
+			PreparedStatement ps=Connexion.con.prepareStatement(sql);
+			ps.setString(1, a.getImmatriculation());
+			ps.setInt(2, a.getCapacite());
+			ps.setString(3, a.getModele());
+			ps.setInt(4, a.getIdCompagnie());
+			ps.execute();
+			System.out.println("Enregistrement effectuée avec succès !!!");
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	public static void ModifierAvions(){
+		Scanner c = new Scanner(System.in);
+		System.out.println("Veuille donnee le champt a modifier :");
+		String val = c.next();
+		System.out.println("Entre Votre modification :");
+		String mod = c.next();
+		System.out.println("Donnee l'immatriculation du champt a modifier :");
+		String immatriculation = c.next();
+
+		String sql = "UPDATE Avion SET "+val+" = ? WHERE immatriculation = ?";
+		Connexion.seConecter();
+		try {
+			PreparedStatement p = Connexion.con.prepareStatement(sql);
+			p.setString(1, mod);
+			p.setString(2, immatriculation);
+			p.executeUpdate();
+			System.out.println("Modification effectuée avec succès");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void SupprimerAvion(){
+		Scanner c = new Scanner(System.in);
+		System.out.println("Entre l'immatriculation du champt a supprimer :");
+		String immatriculation = c.next();
+
+		Connexion.seConecter();
+		String sql = "DELETE FROM Avion WHERE immatriculation = ?";
+		try {
+			PreparedStatement p = Connexion.con.prepareStatement(sql);
+			p.setString(1, immatriculation);
+			p.execute();
+			System.out.println("Suppresion effectuée avec succès !!!");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	private static int recupererCapaciteAvion(Connection connection, String idAvion) throws SQLException{
@@ -94,35 +187,6 @@ public class Avion {
 			System.out.println("L'avion est plein");
 		}
 		return nouvelleCapacite;
-	}
-	
-	public void AjouterAvions() {
-		Avion a=new Avion();
-		try (Scanner c = new Scanner(System.in)) {
-			System.out.println("Entrez l'immatriculation de l'avion : ");
-			a.setImmatriculation(c.next());
-			System.out.println("Entrez le model de l'avion : ");
-			a.setModele(c.next());
-			System.out.println("Quel est le nombre de places dans l'avion ? ");
-			a.setCapacite(c.nextInt());
-			System.out.println("Entrez l'identifiant de la compagnie : ");
-			a.setIdCompagnie(c.nextInt());
-		}
-		
-		String sql="INSERT INTO avion VALUES(?,?,?,?)";
-		Connexion.seConecter();
-		try {
-			PreparedStatement ps=Connexion.con.prepareStatement(sql);
-			ps.setString(1, a.getImmatriculation());
-			ps.setInt(2, a.getCapacite());
-			ps.setString(3, a.getModele());
-			ps.setInt(4, a.getIdCompagnie());
-			ps.execute();
-			System.out.println("Enregistrement effectuée !!!");
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 
 	public static void listeDAvion(Connection connection) throws SQLException{
