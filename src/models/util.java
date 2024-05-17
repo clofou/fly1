@@ -1,11 +1,26 @@
 package models;
-
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.mindrot.jbcrypt.BCrypt;
 
 public class util {
+    private String email;
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
     //Methode pour obtenir la date sous format AAAA-MM-JJ
+
     public static String Date(){
         Scanner entree = new Scanner(System.in);
         //Jour de naissance
@@ -44,6 +59,18 @@ public class util {
                 isIntMois = false;
             }
         } while (!isIntMois);
+        //Email
+        String email;
+        do {
+            System.out.println("Entrez votre adresse email : ");
+            email = c.next();
+            if (isValidEmail(email)) {
+                setEmail(email);
+            } else {
+                System.out.println("Erreur: L'adresse email n'est pas valide. Veuillez réessayer.");
+            }
+        } while (!isValidEmail(email));
+
         //Annee de naissance
         boolean isIntAnnee;
         int anneeNaissance = 0;
@@ -73,5 +100,36 @@ public class util {
         return BCrypt.hashpw(motDePasse, BCrypt.gensalt());
     }
 
+    //Recupération de l'ID de la dernière personne insérée
+    public static int recupererValeurUnique(Connection connection) throws SQLException {
+        // Préparer la requête SQL
+        String sql = "SELECT idPersonne FROM Personne ORDER BY idPersonne DESC LIMIT 1";
+        int idPersonne = 0;
+        try (Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(sql)) {
 
+            // Vérifier si le ResultSet contient des données
+            if (resultSet.next()) {
+                // Récupérer la valeur unique
+                idPersonne = resultSet.getInt("idPersonne");
+
+                // Utiliser la valeur récupérée
+                // ... votre code ici pour utiliser la valeur 'nomUtilisateur'
+            } else {
+                System.out.println("Aucune donnée trouvée.");
+            }
+        }
+        return idPersonne;
+    }
+
+    // Méthode pour vérifier si l'email est valide
+    public static boolean isValidEmail(String email) {
+        String emailRegex = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,7}$";
+        Pattern pattern = Pattern.compile(emailRegex);
+        if (email == null) {
+            return false;
+        }
+        Matcher matcher = pattern.matcher(email);
+        return matcher.matches();
+    }
 }
