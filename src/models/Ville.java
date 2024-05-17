@@ -41,16 +41,28 @@ public class Ville {
             } catch(SQLException e){
                 e.printStackTrace();
             }
-            
-			System.out.print("Entrez l'id du Pays: ");
-			String idPays = scanner.nextLine();
+
+            int idPays = 0;
+            boolean isIdValid = false;
+            while (!isIdValid) {
+                System.out.print("Entrez l'id du Pays (entier uniquement): ");
+                if (scanner.hasNextInt()) {
+                    idPays = scanner.nextInt();
+                    isIdValid = true;
+                } else {
+                    System.out.println("Veuillez entrer un entier valide.");
+                    scanner.next(); // Consommer l'entrée invalide
+                }
+            }
+
+            //String idPays = scanner.nextLine();
 
 			String sql = "INSERT INTO ville(idPays, nom) VALUES(?, ?)";
 
 			try {
 			    Connection con = Connexion.con;
 			    PreparedStatement ps = con.prepareStatement(sql);
-			    ps.setString(1, idPays);
+			    ps.setString(1, String.valueOf(idPays));
 			    ps.setString(2, nom);
 			    ps.executeUpdate();
 			    System.out.println("Ville ajoutée avec succès !");

@@ -38,15 +38,20 @@ public class Reservation {
 		this.nbre_de_passager = nbre_de_passager;
 	}
 
-	public void EffecuterReservation(int id_passager) {
+	public void EffecuterReservation(int id_passager) throws SQLException {
 		String sql="INSERT INTO reservation(idPassager,dateReservation,nombreDePassager) values(?,?,?)";
 
 		Reservation r=new Reservation();
 		System.out.println("renseignez les information concernant la reservation. \n");
 		r.setId_passager(id_passager);
+		System.out.println("CHOISISEZ la ville de Depart :");
+		String villeDepa = c.next();
+		System.out.println("CHOISISEZ la ville D'arrive :");
+		String villeDArrive = c.next();
 		System.out.println("CHOISISEZ la date :");
-		r.setDate_reservation(c.next());
+		r.setDate_reservation(util.Date());
 		System.out.println("Vous voulez reserver pour combien de place ?");
+
 
 
 		boolean bool=false;
@@ -64,6 +69,7 @@ public class Reservation {
 			} }
 
 		int a=r.getNbre_de_passager();
+		Vol.volDispoAUneDate(Connexion.con, r.getDate_reservation(),a,villeDepa, villeDArrive);
 
 		if(a>0) {
 			try {
