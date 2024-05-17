@@ -12,7 +12,7 @@ import java.util.Arrays;
 import java.util.Scanner;
 
 public class Pays {
-
+    // Cette fonction permet d'ajouter un nouveau pays a notre base de données
     public static void ajouterPays(Connection connection, Scanner scanner) {
         System.out.println("Ajout d'un pays : ");
 
@@ -33,7 +33,7 @@ public class Pays {
             throwables.printStackTrace();
         }
     }
-
+    // Cette fonction permet de modifier le nom d'un pays existant
     public static void modifierNomPays(Connection connection, Scanner scanner) {
         System.out.println("Modification du nom d'un pays : ");
 
@@ -59,7 +59,7 @@ public class Pays {
             throwables.printStackTrace();
         }
     }
-
+    // Cette fonction permet de supprimer un pays de notre base
     public static void supprimerPays(Connection connection, Scanner scanner) {
         System.out.println("Suppression d'un pays : ");
 
@@ -80,15 +80,15 @@ public class Pays {
             throwables.printStackTrace();
         }
     }
-
+    // Cette fonction retourne la liste de tout les pays dans ma base de données
     public static void listeDePays(Connection connection) throws SQLException {
         System.out.println("\n");
-        // Create a statement object
+        // Créer un objet Statement
         try (Statement statement = connection.createStatement();
-             // Create the SQL query to retrieve the entire column list
+             // Créez la requête SQL pour récupérer la liste complète des colonnes
              ResultSet resultSet = statement.executeQuery("SELECT idPays, nom FROM Pays")) {
 
-            // Iterate through the result set and print each value
+            // Parcourez l'ensemble de résultats et imprimez chaque valeur
             while (resultSet.next()) {
                 String idPays = resultSet.getString("idPays");
                 String nomPays = resultSet.getString("nom");
@@ -99,7 +99,7 @@ public class Pays {
         }
         System.out.println("\n\n");
     }
-
+    // Cette fonction retourne la liste de tout les Ids
     public static ArrayList<Integer> afficherTousLesIds(Connection connection) {
         String sql = "SELECT idPays FROM pays";
         ArrayList<Integer> listeIds = new ArrayList<>();
