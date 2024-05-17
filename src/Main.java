@@ -1,6 +1,8 @@
-
 import models.*;
 import org.mindrot.jbcrypt.BCrypt;
+
+
+
 import java.sql.SQLException;
 import java.util.Scanner;
 
@@ -89,10 +91,6 @@ public class Main {
         String motDePasse = entree.nextLine();
         String motDePasseHasher = BCrypt.hashpw(motDePasse, BCrypt.gensalt());
 
-        // Instanciation de l'admin
-        Admin admin = new Admin(nom, prenom, email, numTelephone, DateNaissance, motDePasseHasher);
-        //Ajout dans la base de données
-        admin.ajoutAdmin();
     }
 
     private static int ConnexionAdmin(){
