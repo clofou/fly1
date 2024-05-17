@@ -98,8 +98,8 @@ public class Passager extends Personne {
         String insereReservation = "INSERT INTO Reservation (idPassager, dateReservation, nombreDePassager, status) " +
                 "VALUES (?, ?, ?, ?)";
 
-        try (Connection connection = Connexion.con;
-             PreparedStatement reservationStatement = connection.prepareStatement(insereReservation)) {
+        try (
+             PreparedStatement reservationStatement = Connexion.con.prepareStatement(insereReservation)) {
 
             // Insérer la réservation dans la base de données
             reservationStatement.setInt(1, getIdPassager());
@@ -118,21 +118,21 @@ public class Passager extends Personne {
 
     //Methode modifierReservation
 
-    public void modifierReservation(int idReservation, String nouveauStatut) throws SQLException {
+    public void annulerReservation(int idReservation) throws SQLException {
         String modificationQuery = "UPDATE Reservation SET status = ? WHERE idReservation = ? AND idPassager = ?";
 
-        try (Connection connection = Connexion.con;
-             PreparedStatement statement = connection.prepareStatement(modificationQuery)) {
+        try (
+             PreparedStatement statement = Connexion.con.prepareStatement(modificationQuery)) {
 
             // Paramètres pour la modification de la réservation
-            statement.setString(1, nouveauStatut);
+            statement.setString(1, "annulé");
             statement.setInt(2, idReservation);
             statement.setInt(3, getIdPassager());
 
             // Exécution de la requête de mise à jour
             int rowsAffected = statement.executeUpdate();
             if (rowsAffected > 0) {
-                System.out.println("Réservation modifiée avec succès !");
+                System.out.println("Réservation annulée avec succès !");
             } else {
                 System.out.println("Aucune réservation trouvée avec l'ID : " + idReservation);
             }
@@ -147,8 +147,8 @@ public class Passager extends Personne {
     public void verifierStatutReservation(int idReservation) throws SQLException {
         String verificationQuery = "SELECT status FROM Reservation WHERE idReservation = ? AND idPassager = ?";
 
-        try (Connection connection = Connexion.con;
-             PreparedStatement statement = connection.prepareStatement(verificationQuery)) {
+        try (
+             PreparedStatement statement = Connexion.con.prepareStatement(verificationQuery)) {
 
             // Paramètres pour la vérification du statut de la réservation
             statement.setInt(1, idReservation);
@@ -172,8 +172,8 @@ public class Passager extends Personne {
     public int seConnecter(String email, String motDePasse) {
         String selectPassagerQuery = "SELECT idPersonne, motDePasse FROM Personne WHERE email = ?";
 
-        try (Connection connection = Connexion.con;
-             PreparedStatement statement = connection.prepareStatement(selectPassagerQuery)) {
+        try (
+             PreparedStatement statement = Connexion.con.prepareStatement(selectPassagerQuery)) {
 
             // Paramètre pour la requête SELECT
             statement.setString(1, email);

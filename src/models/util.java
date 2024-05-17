@@ -1,14 +1,16 @@
 package models;
-
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.mindrot.jbcrypt.BCrypt;
 
 public class util {
+
     //Methode pour obtenir la date sous format AAAA-MM-JJ
     public static String Date(){
         Scanner entree = new Scanner(System.in);
@@ -48,6 +50,7 @@ public class util {
                 isIntMois = false;
             }
         } while (!isIntMois);
+
         //Annee de naissance
         boolean isIntAnnee;
         int anneeNaissance = 0;
@@ -56,8 +59,8 @@ public class util {
             if (entree.hasNextInt()) {
                 anneeNaissance = entree.nextInt();
                 isIntAnnee = true;
-                if (anneeNaissance > 2024) {
-                    System.out.println("Veuillez donner un nombre inférieur ou égal à 2024");
+                if (anneeNaissance > 3000) {
+                    System.out.println("Veuillez donner un nombre inférieur ou égal à 3000");
                     isIntAnnee = false;
                 }
             } else {
@@ -100,4 +103,14 @@ public class util {
     }
 
 
+    // Méthode pour vérifier si l'email est valide
+    public static boolean isValidEmail(String email) {
+        String emailRegex = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,7}$";
+        Pattern pattern = Pattern.compile(emailRegex);
+        if (email == null) {
+            return false;
+        }
+        Matcher matcher = pattern.matcher(email);
+        return matcher.matches();
+    }
 }
