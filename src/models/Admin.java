@@ -1,5 +1,7 @@
 package models;
 
+import org.mindrot.jbcrypt.BCrypt;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -9,9 +11,8 @@ public class Admin extends Personne {
     private int idAdmin;
 
     // Constructeur
-    public Admin(String nom, String prenom, String email, String numeroDeTelephone, String dateDeNaissance, String motDePasse, int idAdmin) {
+    public Admin(String nom, String prenom, String email, String numeroDeTelephone, String dateDeNaissance, String motDePasse) {
         super(nom, prenom, email, numeroDeTelephone, dateDeNaissance, motDePasse);
-        this.idAdmin = idAdmin;
     }
 
     // Getter et Setter spécifique à Admin
@@ -23,6 +24,42 @@ public class Admin extends Personne {
         this.idAdmin = idAdmin;
     }
 
+    public void ajoutAdmin() throws SQLException {
+        String insertionPersonneQuery = "INSERT INTO Personne (nom, prenom, email, numeroDeTelephone, dateDeNaissance, motDePasse) " +
+                "VALUES (?, ?, ?, ?, ?, ?)";
+        String insertionAdminQuery = "INSERT INTO Admin (idAdmin, idPersonne) VALUES (?, ?)";
+
+        try (
+                PreparedStatement personneStatement = Connexion.con.prepareStatement(insertionPersonneQuery);
+                PreparedStatement adminStatement = Connexion.con.prepareStatement(insertionAdminQuery)) {
+
+            // Insérer dans la table Personne
+            personneStatement.setString(1, getNom());
+            personneStatement.setString(2, getPrenom());
+            personneStatement.setString(3, getEmail());
+            personneStatement.setString(4, getNumeroDeTelephone());
+            personneStatement.setString(5, getDateDeNaissance());
+            personneStatement.setString(6, getMotDePasse());
+
+            personneStatement.executeUpdate();
+            System.out.println(util.recupererValeurUnique(Connexion.con));
+
+            // Insérer dans la table Admin
+            try {
+                adminStatement.setInt(1, util.recupererValeurUnique(Connexion.con));
+                adminStatement.setInt(2, util.recupererValeurUnique(Connexion.con));
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+            adminStatement.executeUpdate();
+
+            System.out.println("Bienvenu au nouveau Administrateur");
+        } catch (SQLException e) {
+            System.err.println("Erreur lors de l'inscription du nouveau administrateur : " + e.getMessage());
+            throw e; // Propagation de l'exception pour une gestion supérieure
+        }
+    }
 
     public void ajouterCompagnie(CompagnieAerienne compagnie) throws SQLException {
         String ajoutComp = "INSERT INTO Compagnie (nomCompagnie, motDePasse, siteWeb, idAdmin) VALUES (?, ?, ?, ?)";
@@ -57,28 +94,37 @@ public class Admin extends Personne {
         }
     }
 
-    public boolean seConnecter(String email, String motDePasse) {
-        String selectAdminQuery = "SELECT idPersonne FROM Personne WHERE email = ? AND motDePasse = ?";
+    public int seConnecter(String email, String motDePasse) {
+        String selectPassagerQuery = "SELECT idPersonne, motDePasse FROM Personne WHERE email = ?";
+
         try (Connection connection = Connexion.con;
-            PreparedStatement statement = connection.prepareStatement(selectAdminQuery)) {
-            // Paramètres pour la requête SELECT
+             PreparedStatement statement = connection.prepareStatement(selectPassagerQuery)) {
+
+            // Paramètre pour la requête SELECT
             statement.setString(1, email);
-            statement.setString(2, motDePasse);
 
             // Exécution de la requête SELECT
             try (ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
-                    int idPersonne = resultSet.getInt("idAdmin");
-                    System.out.println("Vous êtes connecté en tant qu'administrateur (ID : " + idPersonne + ")");
-                    return true; // Connexion réussie
+                    String motDePasseBD = resultSet.getString("motDePasse");
+
+                    // Vérifier le mot de passe haché avec BCrypt
+                    if (BCrypt.checkpw(motDePasse, motDePasseBD)) {
+                        int idPersonne = resultSet.getInt("idPersonne");
+                        System.out.println("Vous êtes connecté en tant qu'admin (ID : " + idPersonne + ")");
+                        return idPersonne; // Connexion réussie
+                    } else {
+                        System.out.println("Identifiants incorrects. Connexion échouée.");
+                        return -1; // Mot de passe incorrect
+                    }
                 } else {
-                    System.out.println("Identifiants incorrects. Connexion échouée.");
-                    return false; // Connexion échouée (identifiants incorrects)
+                    System.out.println("Adresse e-mail non trouvée. Connexion échouée.");
+                    return -1; // Adresse e-mail non trouvée dans la base de données
                 }
             }
         } catch (SQLException e) {
             System.err.println("Erreur lors de la connexion : " + e.getMessage());
-            return false; // Connexion échouée en raison d'une exception SQL
+            return -1; // Connexion échouée en raison d'une exception SQL
         }
     }
 }
