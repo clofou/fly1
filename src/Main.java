@@ -10,7 +10,7 @@ public class Main {
        // System.out.println("Hello Kalifa!");
 
         Avion a = new Avion();
-        //a.AjouterAvions();
+        a.AjouterAvions();
         //a.ModifierAvions();
         //a.SupprimerAvion();
     }

@@ -66,17 +66,6 @@ public class Avion {
 				}
 			}
 
-			/* while (!entreeValide) {
-				if (c.hasNextInt()) {
-					 a.setCapacite(c.nextInt());
-					 entreeValide = true;
-				} else {
-					System.out.println("Veuillez entrer un nombre entier.");
-					c.next(); // Pour vider le buffer
-				}
-			} */
-
-
 			System.out.println("Entrez l'identifiant de la compagnie : ");
 			a.setIdCompagnie(c.nextInt());
 		}
