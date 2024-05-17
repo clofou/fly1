@@ -1,6 +1,7 @@
 package models;
 
 import models.Escale;
+import utils.Date;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -9,6 +10,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+
+import static utils.Date.lireDateValide;
 
 public class VolEscale {
 
@@ -31,11 +34,12 @@ public class VolEscale {
         System.out.print("Ville d'arrivée : ");
         String villeArrivee = scanner.nextLine();
 
-        System.out.print("Entrez la date de départ au format (dd-MM-yyyy) : ");
-        String dateDepart = util.Date();
+        System.out.println("Entrez la date de départ ");
 
-        System.out.print("Entrez la date d'arrivée au format (dd-MM-yyyy) : ");
-        String dateArrivee = util.Date();
+        String dateDepart = lireDateValide();
+
+        System.out.println("Entrez la date d'arrivée ");
+        String dateArrivee = lireDateValide();
 
         int nbr_de_escale = 0;
         boolean isInt;
@@ -64,8 +68,8 @@ public class VolEscale {
             statementVol.setString(1, imma);
             statementVol.setString(2, villeDepart);
             statementVol.setString(3, villeArrivee);
-            statementVol.setString(4, dateDepart);
-            statementVol.setString(5, dateArrivee);
+            statementVol.setString(4, new Date(dateDepart).formatAnglais());
+            statementVol.setString(5, new Date(dateArrivee).formatAnglais());
             statementVol.setInt(6, nbr_de_escale);
             statementVol.setInt(7, tarif);
 
@@ -113,9 +117,9 @@ public class VolEscale {
             scanner.nextLine();
 
             System.out.println("Date et Heure : ");
-            String dateHeure = util.Date();
+            String dateHeure = lireDateValide();
 
-            Escale escale = new Escale(idVille, idVol, imma, dateHeure);
+            Escale escale = new Escale(idVille, idVol, imma, new Date(dateHeure).formatAnglais());
             escalesList.add(escale);
         }
 
