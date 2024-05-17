@@ -1,5 +1,9 @@
 package models;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Scanner;
 
 import org.mindrot.jbcrypt.BCrypt;
@@ -71,6 +75,28 @@ public class util {
         Scanner entree = new Scanner(System.in);
         String motDePasse = entree.nextLine();
         return BCrypt.hashpw(motDePasse, BCrypt.gensalt());
+    }
+
+    //Recupération de l'ID de la dernière personne insérée
+    public static int recupererValeurUnique(Connection connection) throws SQLException {
+        // Préparer la requête SQL
+        String sql = "SELECT idPersonne FROM Personne ORDER BY idPersonne DESC LIMIT 1";
+        int idPersonne = 0;
+        try (Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(sql)) {
+
+            // Vérifier si le ResultSet contient des données
+            if (resultSet.next()) {
+                // Récupérer la valeur unique
+                idPersonne = resultSet.getInt("idPersonne");
+
+                // Utiliser la valeur récupérée
+                // ... votre code ici pour utiliser la valeur 'nomUtilisateur'
+            } else {
+                System.out.println("Aucune donnée trouvée.");
+            }
+        }
+        return idPersonne;
     }
 
 
