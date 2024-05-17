@@ -10,11 +10,12 @@ public class Main {
         Connexion.seConecter();
 
         //Pays.ajouterPays(Connexion.con, scanner);
-        Ville.ajouterUneVille();
-        System.out.println("Hello Amadou!");
+        InscriptionPassager();
+        Reservation r = new Reservation();
+        r.EffecuterReservation();
     }
 
-    private void InscriptionPassager() throws SQLException {
+    private static void InscriptionPassager() throws SQLException {
         // Workflow pour l'inscription
         Scanner entree = new Scanner(System.in);
         System.out.println("Veuillez entrer vos informations :\n");
