@@ -119,7 +119,6 @@ public class Reservation {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-
 			}
 			System.out.println("Voulez-vous payer ???? : ");
 			String b =c.next();
