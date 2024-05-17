@@ -35,26 +35,9 @@ public class Categorie {
         System.out.println("Nom categorie : ");
         String nom = scanner.nextLine();
 
-        
-
-       
-        // int vol_id  = 0;
-        // boolean isInt = false;
-        // do {
-        //     System.out.println("Vol id : ");
-        //     if (scanner.hasNextInt()) {
-        //         vol_id = scanner.nextInt();
-        //         isInt = true;
-        //     } else {
-        //         System.out.println("Veuillez saisir un entier.");
-        //         scanner.next(); // Pour vider le scanner et éviter une boucle infinie
-        //     }
-        // } while (!isInt);
-
         String sql = "INSERT INTO categorie (nom) VALUES (?)";
         try (PreparedStatement statement = connection.prepareStatement(sql)){
             statement.setString(1,nom);
-            // statement.setInt(2,vol_id);
 
             int lignesModifiees = statement.executeUpdate();
             if (lignesModifiees > 0) {
