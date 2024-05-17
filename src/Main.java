@@ -1,6 +1,8 @@
 
 import models.*;
 import org.mindrot.jbcrypt.BCrypt;
+import utils.Date;
+
 import java.sql.SQLException;
 import java.util.Scanner;
 
@@ -9,14 +11,8 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
         Connexion.seConecter();
 
+        String dateDepart = String.valueOf(new Date(Date.lireDateValide()));
 
-
-
-        int IdPassager = ConnexionPassager();
-        System.out.println("l'Id du passager connecter est : "+ IdPassager);
-
-        Reservation r = new Reservation();
-        r.EffecuterReservation(IdPassager);
     }
 
     private static void InscriptionPassager() throws SQLException {
