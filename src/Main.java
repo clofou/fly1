@@ -1,21 +1,26 @@
 import models.*;
 import org.mindrot.jbcrypt.BCrypt;
+import utils.Date;
 import java.sql.*;
 import java.util.Scanner;
+
+import static utils.Date.lireDateValide;
 
 public class Main {
     public static void main(String[] args) throws SQLException {
         Scanner scanner = new Scanner(System.in);
         Connexion.seConecter();
 
-        Vol.ajouterVol(Connexion.con, scanner);
+        InscriptionPassager();
 
-
-        int IdPassager = ConnexionPassager();
-        System.out.println("l'Id du passager connecter est : "+ IdPassager);
-
-        Reservation r = new Reservation();
-        r.EffecuterReservation(IdPassager);
+        while (true){
+            int idPassager = ConnexionPassager();
+            if(idPassager != -1){
+                Reservation r = new Reservation();
+                r.EffecuterReservation(idPassager);
+                break;
+            }
+        }
 
     }
 
@@ -37,7 +42,7 @@ public class Main {
         String numTelephone = entree.nextLine();
         //Date de Naissance
         System.out.println("Votre date de naissance");
-        String DateNaissance = util.Date();
+        String DateNaissance = new Date(lireDateValide()).formatAnglais();;
         //Mot de Passe
         System.out.println("Donnez un mot de passe :");
         String motDePasse = entree.nextLine();
@@ -81,7 +86,7 @@ public class Main {
         System.out.println("Votre numero de telephone :");
         String numTelephone = entree.nextLine();
         //Date de Naissance
-        String DateNaissance = util.Date();
+        String DateNaissance = new Date(lireDateValide()).formatAnglais();;
         //Mot de Passe
         System.out.println("Donnez un mot de passe :");
         String motDePasse = entree.nextLine();
