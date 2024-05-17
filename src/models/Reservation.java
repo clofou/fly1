@@ -1,9 +1,6 @@
 package models;
 
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.Scanner;
 
 import models.Connexion;
@@ -162,6 +159,28 @@ public class Reservation {
 		}
 
 
+
+	}
+	private static int recupererIdReservation(Connection connection) throws SQLException {
+		// Préparer la requête SQL
+		String sql = "SELECT idReservation FROM Reservation ORDER BY idReservation DESC LIMIT 1";
+		int idReservation = 0;
+		try (Statement statement = connection.createStatement();
+			 ResultSet resultSet = statement.executeQuery(sql)) {
+
+			// Vérifier si le ResultSet contient des données
+			if (resultSet.next()) {
+				// Récupérer la valeur unique
+				idReservation = resultSet.getInt("idReservation");
+				System.out.println("Id de la Reservation : " + idReservation);
+
+				// Utiliser la valeur récupérée
+				// ... votre code ici pour utiliser la valeur 'nomUtilisateur'
+			} else {
+				System.out.println("Aucune donnée trouvée.");
+			}
+		}
+		return idReservation;
 	}
 
 
