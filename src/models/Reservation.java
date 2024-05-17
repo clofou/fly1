@@ -41,12 +41,12 @@ public class Reservation {
 		this.nbre_de_passager = nbre_de_passager;
 	}
 
-	public void EffecuterReservation() {
+	public void EffecuterReservation(int id_passager) {
 		String sql="INSERT INTO reservation(idPassager,dateReservation,nombreDePassager) values(?,?,?)";
 
 		Reservation r=new Reservation();
-		System.out.println("renseignez les information concernant la reservation. \n Numero passager :");
-		r.setId_passager(c.nextInt());
+		System.out.println("renseignez les information concernant la reservation. \n");
+		r.setId_passager(id_passager);
 		System.out.println("CHOISISEZ la date :");
 		r.setDate_reservation(c.next());
 		System.out.println("Vous voulez reserver pour combien de place ?");
