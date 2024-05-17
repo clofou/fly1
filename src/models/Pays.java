@@ -100,20 +100,21 @@ public class Pays {
         System.out.println("\n\n");
     }
 
-    public static void afficherTousLesIds(Connection connection) {
-        System.out.println("Liste des IDs des pays :");
+    public static ArrayList<Integer> afficherTousLesIds(Connection connection) {
         String sql = "SELECT idPays FROM pays";
+        ArrayList<Integer> listeIds = new ArrayList<>();
+
         try (Statement statement = connection.createStatement();
              ResultSet resultSet = statement.executeQuery(sql)) {
-            ArrayList<Integer> listeIds = new ArrayList<>();
             while (resultSet.next()) {
                 int id = resultSet.getInt("idPays");
                 listeIds.add(id);
             }
-            System.out.println(listeIds);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
+
+        return listeIds;
     }
 
 
