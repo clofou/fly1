@@ -94,7 +94,7 @@ public class Admin extends Personne {
         }
     }
 
-    public boolean seConnecter(String email, String motDePasse) {
+    public int seConnecter(String email, String motDePasse) {
         String selectPassagerQuery = "SELECT idPersonne, motDePasse FROM Personne WHERE email = ?";
 
         try (Connection connection = Connexion.con;
