@@ -181,7 +181,6 @@ public class Reservation {
 						e.printStackTrace();
 					}
 				}
-				Paiement.ajouterPaiement(Connexion.con, c);
 			}
 		}
 	}
