@@ -10,17 +10,8 @@ import java.util.regex.Pattern;
 import org.mindrot.jbcrypt.BCrypt;
 
 public class util {
-    private String email;
 
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
     //Methode pour obtenir la date sous format AAAA-MM-JJ
-
     public static String Date(){
         Scanner entree = new Scanner(System.in);
         //Jour de naissance
@@ -59,17 +50,6 @@ public class util {
                 isIntMois = false;
             }
         } while (!isIntMois);
-        //Email
-        String email;
-        do {
-            System.out.println("Entrez votre adresse email : ");
-            email = c.next();
-            if (isValidEmail(email)) {
-                setEmail(email);
-            } else {
-                System.out.println("Erreur: L'adresse email n'est pas valide. Veuillez réessayer.");
-            }
-        } while (!isValidEmail(email));
 
         //Annee de naissance
         boolean isIntAnnee;
@@ -79,8 +59,8 @@ public class util {
             if (entree.hasNextInt()) {
                 anneeNaissance = entree.nextInt();
                 isIntAnnee = true;
-                if (anneeNaissance > 2024) {
-                    System.out.println("Veuillez donner un nombre inférieur ou égal à 2024");
+                if (anneeNaissance > 3000) {
+                    System.out.println("Veuillez donner un nombre inférieur ou égal à 3000");
                     isIntAnnee = false;
                 }
             } else {
@@ -121,6 +101,7 @@ public class util {
         }
         return idPersonne;
     }
+
 
     // Méthode pour vérifier si l'email est valide
     public static boolean isValidEmail(String email) {

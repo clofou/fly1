@@ -66,5 +66,5 @@ public abstract class Personne {
         this.motDePasse = motDePasse;
     }
 
-    public abstract boolean seConnecter(String email, String motDePasse);
+    public abstract int seConnecter(String email, String motDePasse);
 }
