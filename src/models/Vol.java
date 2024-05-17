@@ -10,6 +10,7 @@ import java.util.Scanner;
 public class Vol {
 
     private int idVol;
+    private String immatriculation;
     private String villeDeDepart;
     private String villeDArrive;
     private Date dateDeDepart;
@@ -18,11 +19,21 @@ public class Vol {
     private int tarif;
 
     public Vol(int idVol, String villeDeDepart, String villeDArrive, Date dateDeDepart, Date dateDArrive){
+        this.immatriculation = immatriculation;
         this.idVol = idVol;
         this.villeDeDepart = villeDeDepart;
         this.villeDArrive = villeDArrive;
         this.dateDeDepart = dateDeDepart;
         this.dateDArrive = dateDArrive;
+    }
+
+
+    public String getImmatriculation() {
+        return immatriculation;
+    }
+
+    public void setImmatriculation(String immatriculation) {
+        this.immatriculation = immatriculation;
     }
 
     public int getIdVol() {
@@ -109,7 +120,7 @@ public class Vol {
                 System.out.print(villeDArrive + "  ");
                 System.out.print(dateDeDepart + " ");
                 System.out.print("nbreEscale:"+nombreDEscale + " ");
-                System.out.println("tarif:"+tarif+"euros");
+                System.out.println("tarif:"+tarif+"cfa");
             }
         }
     }
@@ -132,36 +143,11 @@ public class Vol {
         System.out.print("Ville d'arrivée : ");
         String villeArrivee = scanner.nextLine();
 
+        System.out.print("Entrez la date de depart au format (dd-MM-yyyy) : ");
+        String dateDepart = util.Date();
 
-
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
-        Date dateDepart = null;
-        boolean isDateValid = false;
-        do {
-            System.out.print("Entrez la date de départ au format (dd-MM-yyyy) : ");
-            String inputDate = scanner.nextLine();
-
-            try {
-                dateDepart = new java.sql.Date(dateFormat.parse(inputDate).getTime());
-                isDateValid = true;
-            } catch (ParseException e) {
-                System.out.println("Format de date incorrect. Veuillez réessayer.");
-            }
-        } while (!isDateValid);
-
-        Date dateArrivee = null;
-        isDateValid = false;
-        do {
-            System.out.print("Entrez la date d'arrivée au format (dd-MM-yyyy) : ");
-            String inputDate = scanner.nextLine();
-
-            try {
-                dateArrivee = new java.sql.Date(dateFormat.parse(inputDate).getTime());
-                isDateValid = true;
-            } catch (ParseException e) {
-                System.out.println("Format de date incorrect. Veuillez réessayer.");
-            }
-        } while (!isDateValid);
+        System.out.print("Entrez la date d'arrivée au format (dd-MM-yyyy) : ");
+        String dateArrivee = util.Date();
 
 
         int nbr_de_escale = 0;
@@ -185,8 +171,8 @@ public class Vol {
             statement.setString(1, imma);
             statement.setString(2, villeDepart);
             statement.setString(3, villeArrivee);
-            statement.setDate(4, dateDepart);
-            statement.setDate(5, dateArrivee);
+            statement.setString(4, dateDepart);
+            statement.setString(5, dateArrivee);
             statement.setInt(6, nbr_de_escale);
             statement.setInt(7, tarif);
 
@@ -380,4 +366,5 @@ public class Vol {
 
         return vols;
     }
+
 }

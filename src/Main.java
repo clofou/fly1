@@ -1,18 +1,21 @@
 import models.*;
-
+import org.mindrot.jbcrypt.BCrypt;
 import java.sql.*;
 import java.util.Scanner;
-import org.mindrot.jbcrypt.BCrypt;
-
 
 public class Main {
     public static void main(String[] args) throws SQLException {
         Scanner scanner = new Scanner(System.in);
         Connexion.seConecter();
-        //int IdPassager = ConnexionPassager();
-        //System.out.println("l'Id du passager connecter est : "+ IdPassager);
+
+        Vol.ajouterVol(Connexion.con, scanner);
 
 
+        int IdPassager = ConnexionPassager();
+        System.out.println("l'Id du passager connecter est : "+ IdPassager);
+
+        Reservation r = new Reservation();
+        r.EffecuterReservation(IdPassager);
 
     }
 
@@ -43,6 +46,8 @@ public class Main {
         // Instanciation du passager
         Passager passager = new Passager(nom, prenom, email, numTelephone, DateNaissance, motDePasseHasher);
         passager.inscription();
+
+
     }
 
     private static int ConnexionPassager(){
@@ -82,10 +87,6 @@ public class Main {
         String motDePasse = entree.nextLine();
         String motDePasseHasher = BCrypt.hashpw(motDePasse, BCrypt.gensalt());
 
-        // Instanciation de l'admin
-        Admin admin = new Admin(nom, prenom, email, numTelephone, DateNaissance, motDePasseHasher);
-        //Ajout dans la base de données
-        admin.ajoutAdmin();
     }
 
     private static int ConnexionAdmin(){
