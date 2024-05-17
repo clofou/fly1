@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Scanner;
 
 public class Ville {
@@ -33,14 +34,16 @@ public class Ville {
 
     public static void ajouterUneVille() {
         try (Scanner scanner = new Scanner(System.in)) {
-			System.out.print("Entrez le nom de la ville: ");
-			String nom = scanner.nextLine();
-            System.out.println("Liste de Pays: ");
-            try{
+            System.out.print("Entrez le nom de la ville: ");
+            String nom = scanner.nextLine();
+
+            System.out.println("Liste des pays: ");
+            try {
                 Pays.listeDePays(Connexion.con);
-            } catch(SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
+
             boolean idPaysValide = false;
             String idPays = null;
             while (!idPaysValide) {
@@ -49,7 +52,31 @@ public class Ville {
 
                 // Vérifier si l'entrée ne contient que des chiffres à l'aide d'une expression régulière
                 if (idPays.matches("\\d+")) {
-                    idPaysValide = true;
+                    try {
+                        int idPaysInt = Integer.parseInt(idPays);
+
+                        // Vérifier si l'ID existe dans la liste des ID de pays disponibles
+                        boolean idTrouve = false;
+                        List<Integer> idPaysDisponibles = Pays.afficherTousLesIds(Connexion.con);
+                        for (Integer idDisponible : idPaysDisponibles) {
+                            if (idDisponible == idPaysInt) {
+                                idTrouve = true;
+                                break;
+                            }
+                        }
+
+                        if (idTrouve) {
+                            idPaysValide = true;
+                        } else {
+                            System.out.println("Erreur: L'ID du pays n'est pas valide. Veuillez choisir parmi les ID disponibles:");
+                            for (Integer idDisponible : idPaysDisponibles) {
+                                System.out.print(idDisponible + " ");
+                            }
+                            System.out.println();
+                        }
+                    } catch (NumberFormatException e) {
+                        System.out.println("Erreur: L'ID du pays doit être un nombre.");
+                    }
                 } else {
                     System.out.println("Erreur: L'ID du pays ne peut contenir que des chiffres.");
                 }
@@ -57,17 +84,17 @@ public class Ville {
 
             String sql = "INSERT INTO ville(idPays, nom) VALUES(?, ?)";
 
-			try {
-			    Connection con = Connexion.con;
-			    PreparedStatement ps = con.prepareStatement(sql);
-			    ps.setString(1,idPays);
-			    ps.setString(2, nom);
-			    ps.executeUpdate();
-			    System.out.println("Ville ajoutée avec succès !");
-			} catch (SQLException e) {
-			    e.printStackTrace();
-			}
-		}
+            try {
+                Connection con = Connexion.con;
+                PreparedStatement ps = con.prepareStatement(sql);
+                ps.setInt(1, Integer.parseInt(idPays));
+                ps.setString(2, nom);
+                ps.executeUpdate();
+                System.out.println("Ville ajoutée avec succès !");
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public static void modifierVilleParId() {
@@ -98,23 +125,6 @@ public class Ville {
 		}
     }
 
-    public static void afficherToutesLesVilles() {
-        String sql = "SELECT * FROM ville";
 
-        try {
-            Connection con = Connexion.con;
-            PreparedStatement ps = con.prepareStatement(sql);
-            ResultSet rs = ps.executeQuery();
-            System.out.println("Liste des villes:");
-            while (rs.next()) {
-                int idVille = rs.getInt("idVille");
-                String nom = rs.getString("nom");
-                System.out.println("ID: " + idVille + ", Nom: " + nom);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
 
-    
 }
