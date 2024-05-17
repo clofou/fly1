@@ -10,6 +10,9 @@ public class Main {
         Connexion.seConecter();
 
 
+        Vol.ajouterVol(Connexion.con, scanner);
+
+
 
 
         int IdPassager = ConnexionPassager();
