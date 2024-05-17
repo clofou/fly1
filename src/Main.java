@@ -1,16 +1,16 @@
+
 import models.*;
+import org.mindrot.jbcrypt.BCrypt;
 import java.sql.SQLException;
 import java.util.Scanner;
-import org.mindrot.jbcrypt.BCrypt;
 
 public class Main {
     public static void main(String[] args) throws SQLException {
         Scanner scanner = new Scanner(System.in);
         Connexion.seConecter();
 
-        Reservation r = new Reservation();
-        r.EffecuterReservation();
-
+        //Pays.ajouterPays(Connexion.con, scanner);
+        Ville.ajouterUneVille();
         System.out.println("Hello Amadou!");
     }
 
@@ -41,21 +41,6 @@ public class Main {
         Passager passager = new Passager(nom, prenom, email, numTelephone, DateNaissance, motDePasseHasher);
         passager.inscription();
 
-    }
-
-    private void ConnexionPassager(){
-        // Connexion du passager à la base de données
-        Scanner entree = new Scanner(System.in);
-        System.out.println("Pour vous connecter Veuillez donner votre E-mail : ");
-        String email = entree.nextLine();
-        System.out.println("Donnez votre mot de passe : ");
-        String motDePasse = entree.nextLine();
-        String HashermotDePasseFourni = BCrypt.hashpw(motDePasse, BCrypt.gensalt());
-
-        Passager passager = new Passager(null,null,email,null,null,HashermotDePasseFourni);
-        passager.seConnecter(email, motDePasse);
 
     }
-
-
 }
