@@ -11,7 +11,7 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
         Connexion.seConecter();
 
-        InscriptionPassager();
+        /*InscriptionPassager();
 
         while (true){
             int idPassager = ConnexionPassager();
@@ -20,7 +20,8 @@ public class Main {
                 r.EffecuterReservation(idPassager);
                 break;
             }
-        }
+        }*/
+        Paiement.ajouterPaiement();
 
     }
 
