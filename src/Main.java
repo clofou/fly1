@@ -90,7 +90,8 @@ public class Main {
                                 case "1":
                                     Reservation r = new Reservation();
                                     r.EffecuterReservation(idPassager);
-                                    System.out.println("Cas 1");
+
+                                    System.out.println(" ");
                                     continue passagerConnecter; // Cette instruction donne la chance a l'utilisateur de se connecter Maintenant
 
                                 case "2":

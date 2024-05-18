@@ -49,6 +49,7 @@ public class Reservation {
 		Reservation r=new Reservation();
 		System.out.println(Color.ANSI_BLUE+"----- Renseignez les informations concernant la reservation. -----\n"+Color.ANSI_RESET);
 		r.setId_passager(id_passager);
+
 		String villeDepa;
 		while (true){
 			System.out.print("Choisissez la ville de Depart : ");
@@ -61,8 +62,6 @@ public class Reservation {
 			}
 		}
 
-
-		System.out.print("Choisissez la ville D'arrivee : ");
 		String villeDArrive;
 		while (true){
 			System.out.print("Choisissez la ville d'arrive : ");
@@ -94,25 +93,27 @@ public class Reservation {
 
 
 		// Affiche La liste des Vols Correspondants
-		boolean isVolDispo = Vol.volDispoAUneDate(Connexion.con, r.getDate_reservation(),a,villeDepa, villeDArrive);
+		ArrayList<String> listIdVol = Vol.volDispoAUneDate(Connexion.con, r.getDate_reservation(),a,villeDepa, villeDArrive);
+		boolean isVolDispo = !listIdVol.isEmpty();
 
-		if (isVolDispo){
+        if (isVolDispo){
 			Infopassager i=new Infopassager();
-			ArrayList<Integer> listIdVol = Vol.listeDesIds(Connexion.con);
+			String stIdVol;
 			while (true){
 				System.out.print("Choisissez votre numero vol : ");
-				i.setIdVol(c.nextInt());
-				if(listIdVol.contains(i.getIdVol())){
+				stIdVol = c.next();
+
+				if(listIdVol.contains(stIdVol)){
 					break;
 				} else {
 					System.out.println(Color.ANSI_RED+" ⚠️ Le Vol Selectionne n'existe pas"+Color.ANSI_RESET);
 				}
 			}
+			i.setIdVol(Integer.parseInt(stIdVol));
 
 
 			if(a>0) {
 				try {
-					Connexion.seConecter();
 					PreparedStatement ps=Connexion.con.prepareStatement(sql);
 					ps.setInt(1, r.getId_passager());ps.setString(2, r.getDate_reservation());
 					ps.setInt(3, r.getNbre_de_passager());ps.execute();
@@ -131,16 +132,28 @@ public class Reservation {
 
 					i.setIdReservation(recupererIdReservation(Connexion.con));
 
+					// Choix De la Categorie
 					System.out.println("Choisissez la categorie de reservation :");
-					Categorie.listeDeCategorie(Connexion.con);
-					System.out.print("Categorie: ");
-					i.setIdCategorie(c.nextInt());
+					ArrayList<String> lisIdCat = Categorie.listeDeCategorie(Connexion.con);
+
+					String stIdCat;
+					while (true){
+						System.out.print("Categorie: ");
+						stIdCat = c.next();
+
+						if(lisIdCat.contains(stIdCat)){
+							break;
+						} else {
+							System.out.println(Color.ANSI_RED+" ⚠️ La Categorie Selectionne n'existe pas"+Color.ANSI_RESET);
+						}
+					}
+					i.setIdCategorie(Integer.parseInt(stIdCat));
 
 
 					//Nom Passager
 
 					while (true) {
-						System.out.print("nom de Famille : ");
+						System.out.print("Nom de Famille : ");
 						i.setNomPassagerEtranger(c.next());
 						if (NameValidator.isValidName(i.getNomPassagerEtranger())) {
 							break;
@@ -189,7 +202,7 @@ public class Reservation {
 
 			}
 		} else {
-			System.out.println("Aucun vol Disponible !!!!");
+			System.out.println("Aucun vol Disponible !!!!\n");
 		}
 	}
 
