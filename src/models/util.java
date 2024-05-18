@@ -127,4 +127,12 @@ public class util {
         }
         return true;
     }
+    public static String ajoutEspace(String s){
+        StringBuilder sBuilder = new StringBuilder(s);
+        while (sBuilder.length() <= 8){
+            sBuilder.append(" ");
+        }
+        s = sBuilder.toString();
+        return s;
+    }
 }

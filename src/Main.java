@@ -8,8 +8,7 @@ import java.sql.*;
 import java.util.Objects;
 import java.util.Scanner;
 
-import static models.util.isValidEmail;
-import static models.util.isValidInternationalNumber;
+import static models.util.*;
 import static utils.Date.lireDateValide;
 
 public class Main {
@@ -95,7 +94,7 @@ public class Main {
                                     continue passagerConnecter; // Cette instruction donne la chance a l'utilisateur de se connecter Maintenant
 
                                 case "2":
-                                    //detailReservation();
+                                    detailReservation(idPassager);
                                     continue passagerConnecter; // Cette instruction donne la chance a l'utilisateur de se connecter Maintenant
 
                             }
@@ -235,77 +234,70 @@ public class Main {
     //Les details de reservation effectuer par un passager
     private static void detailReservation(int IdPassager){
         if (IdPassager != -1) {
-            String listeReservationIdPersonne = "SELECT r.idReservation, r.dateReservation, r.nombreDePassager, p.idPaiement,\n" +
-                    "                p.montant,\n" +
-                    "                p.modePaiement,\n" +
-                    "                p.datePaiement,\n" +
-                    "                i.id,\n" +
-                    "                i.nomPassagerEtranger,\n" +
-                    "                i.prenomPassagerEtranger,\n" +
-                    "                i.numeroPasseport,\n" +
-                    "                v.idVol,\n" +
-                    "                v.immatriculation,\n" +
-                    "                v.villeDeDepart,\n" +
-                    "                v.villeDArrive,\n" +
-                    "                v.dateDeDepart,\n" +
-                    "                v.dateDArrive,\n" +
-                    "                v.nombreDEscale,\n" +
-                    "                v.tarif,\n" +
-                    "                c.idCategorie,\n" +
-                    "                c.nom AS nomCategorie\n" +
-                    "        FROM\n" +
-                    "        reservation r\n" +
-                    "        JOIN\n" +
-                    "        infopassager i ON r.idReservation = i.idReservation\n" +
-                    "        JOIN\n" +
-                    "        vol v ON i.idVol = v.idVol\n" +
-                    "        LEFT JOIN\n" +
-                    "        paiement p ON r.idReservation = p.idReservation\n" +
-                    "        LEFT JOIN\n" +
-                    "        categorie c ON i.idCategorie = c.idCategorie\n" +
-                    "        WHERE\n" +
-                    "        r.idPassager = ?;";
+            String listeReservationIdPersonne = "SELECT r.idReservation, r.dateReservation, r.nombreDePassager, i.id, " +
+                    "i.nomPassagerEtranger, i.prenomPassagerEtranger, i.numeroPasseport, v.idVol, v.immatriculation, " +
+                    "v.villeDeDepart, v.villeDArrive, v.dateDeDepart, v.dateDArrive, v.nombreDEscale, v.tarif, " +
+                    "c.idCategorie, c.nom AS nomCategorie FROM reservation r NATURAL JOIN infopassager i NATURAL JOIN " +
+                    "vol v NATURAL JOIN categorie c WHERE r.idPassager ="+ IdPassager;
+
+
+            System.out.println(Color.ANSI_PURPLE+"            \nDetails de resevation"+Color.ANSI_RESET);
+            System.out.print("idReservation");
+            System.out.print("      dateReservation");
+            System.out.print("      nomPassagerEtranger");
+            System.out.print("      prenomPassagerEtranger");
+            System.out.print("      numeroPasseport");
+            System.out.print("      immatriculation Avion");
+            System.out.print("      villeDeDepart");
+            System.out.print("      villeDArrive");
+            System.out.print("      dateDeDepart");
+            System.out.print("      nombreDEscale");
+            System.out.print("      tarif");
+            System.out.println("      nomCategorie");
+
+            boolean isReser = false;
 
             try (PreparedStatement statement = Connexion.con.prepareStatement(listeReservationIdPersonne)) {
 
-                // Paramètre pour la requête SELECT
-                statement.setInt(1, IdPassager);
-
                 // Exécution de la requête SELECT
                 try (ResultSet resultSet = statement.executeQuery()) {
-                    if (resultSet.next()) {
+                    while (resultSet.next()) {
+                        isReser = true;
+
                         int idReservation = resultSet.getInt("r.idReservation");
                         String dateReservation = resultSet.getString("r.dateReservation");
-                        int nombreDePassager = resultSet.getInt("r.nombreDePassager");
-                        int idPaiement = resultSet.getInt("p.idPaiement");
-                        int montant = resultSet.getInt("p.montant");
-                        String modePaiement = resultSet.getString("p.modePaiement");
-                        String datePaiement = resultSet.getString("p.datePaiement");
-                        int id = resultSet.getInt("i.id");
                         String nomPassagerEtranger = resultSet.getString("i.nomPassagerEtranger");
                         String prenomPassagerEtranger = resultSet.getString("i.prenomPassagerEtranger");
-                        int numeroPasseport = resultSet.getInt("i.numeroPasseport");
-                        int idVol = resultSet.getInt("v.idVol");
+                        String numeroPasseport = resultSet.getString("i.numeroPasseport");
                         String immatriculation = resultSet.getString("v.immatriculation");
                         String villeDeDepart = resultSet.getString("v.villeDeDepart");
                         String villeDArrive = resultSet.getString("v.villeDArrive");
                         String dateDeDepart = resultSet.getString("v.dateDeDepart");
-                        String dateDArrive = resultSet.getString("v.dateDArrive");
                         int nombreDEscale = resultSet.getInt("v.nombreDEscale");
                         int tarif = resultSet.getInt("v.tarif");
-                        int idCategorie = resultSet.getInt("c.idCategorie");
-                        String nom = resultSet.getString("c.nom");
+                        String nomCategorie = resultSet.getString("nomCategorie");
 
-                        System.out.println("Les details de resevation du passager "+IdPassager+"sont :");
-                        System.out.printf("ID Reservation : "+idReservation+"\n" +
-                                "Date Reservation : "+dateReservation+"\n" +
-                                "");
-                    } else {
-                        System.out.println("Pas de reservation disponible pour l'ID :"+IdPassager);
+
+                        System.out.print(idReservation);
+                        System.out.print("                  "+dateReservation);
+                        System.out.print("             "+ajoutEspace(nomPassagerEtranger));
+                        System.out.print("               "+ajoutEspace(prenomPassagerEtranger));
+                        System.out.print("                  "+ajoutEspace(numeroPasseport));
+                        System.out.print("             "+ajoutEspace(immatriculation));
+                        System.out.print("                  "+ajoutEspace(villeDeDepart));
+                        System.out.print("             "+ajoutEspace(villeDArrive));
+                        System.out.print("     "+dateDeDepart);
+                        System.out.print("             "+nombreDEscale);
+                        System.out.print("             "+tarif);
+                        System.out.println("         "+ajoutEspace(nomCategorie));
                     }
                 }
             } catch (SQLException e) {
-                System.err.println("Erreur lors de la connexion : " + e.getMessage());
+                e.printStackTrace();
+            }
+
+            if (!isReser){
+                System.out.println("                        ⚠️Pas de reservation Disponible .. ⚠️");
             }
 
 
