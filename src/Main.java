@@ -88,13 +88,13 @@ public class Main {
 
                                 // En fonction des choix effectuer Le Workflow Correspondant
                                 case "1":
-                                    /*Reservation r = new Reservation();
-                                    r.EffecuterReservation(idPassager);*/
+                                    Reservation r = new Reservation();
+                                    r.EffecuterReservation(idPassager);
                                     System.out.println("Cas 1");
                                     continue passagerConnecter; // Cette instruction donne la chance a l'utilisateur de se connecter Maintenant
 
                                 case "2":
-                                    detailReservation();
+                                    //detailReservation();
                                     continue passagerConnecter; // Cette instruction donne la chance a l'utilisateur de se connecter Maintenant
 
                             }
@@ -123,7 +123,6 @@ public class Main {
             }
             break;
         }
-
 
     }
 

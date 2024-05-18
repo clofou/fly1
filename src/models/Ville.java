@@ -1,9 +1,9 @@
 package models;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import utils.Color;
+
+import java.sql.*;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Ville {
@@ -118,5 +118,33 @@ public class Ville {
         }
     }
 
+    public static ArrayList<String> listeDeVille(Connection connection) throws SQLException{
+        System.out.print("\n");
+        ArrayList<String> listeville = new ArrayList<>();
+        // Create a statement object
+        try (Statement statement = connection.createStatement();
+             // Create the SQL query to retrieve the entire column list
+             ResultSet resultSet = statement.executeQuery("SELECT nom FROM Ville")) {
+
+            // Iterate through the result set and print each value
+            System.out.print(Color.ANSI_YELLOW+"[ ");
+            int counter = 0;
+            int lastCounterValue = 0;
+            while (resultSet.next()) {
+
+                String nomVille = resultSet.getString("nom");
+                listeville.add(nomVille);
+                if(counter>=lastCounterValue+8){
+                    System.out.println(" ");
+                    lastCounterValue = counter;
+                }
+
+                System.out.print(nomVille + ", ");
+                counter++;
+            }
+            System.out.println(" ]\n"+Color.ANSI_RESET);
+        }
+        return listeville;
+    }
     
 }
