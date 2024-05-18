@@ -113,4 +113,18 @@ public class util {
         Matcher matcher = pattern.matcher(email);
         return matcher.matches();
     }
+
+    public static boolean isValidInternationalNumber(String phoneNumber) {
+        return Pattern.matches("^\\+(?:[0-9] ?){6,14}[0-9]$", phoneNumber);
+    }
+
+    public static boolean isBlank(String str) {
+        int len = (str == null) ? 0 : str.length();
+        for (int i = 0; i < len; i++) {
+            if (!Character.isWhitespace(str.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
 }
