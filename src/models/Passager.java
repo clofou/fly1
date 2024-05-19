@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import org.mindrot.jbcrypt.BCrypt;
+import utils.Color;
 
 public class Passager extends Personne {
     private int idPassager;
@@ -84,7 +85,7 @@ public class Passager extends Personne {
 
             passagerStatement.executeUpdate();
 
-            System.out.println("Passager inscrit avec succès !");
+            System.out.println("\n!!! Passager inscrit avec succès !!!");
             return util.recupererValeurUnique(Connexion.con);
         } catch (SQLException e) {
             System.err.println("Erreur lors de l'inscription du passager : " + e.getMessage());
@@ -119,7 +120,7 @@ public class Passager extends Personne {
     //Methode modifierReservation
 
     public void annulerReservation(int idReservation) throws SQLException {
-        String modificationQuery = "UPDATE Reservation SET status = ? WHERE idReservation = ? AND idPassager = ?";
+        String modificationQuery = "UPDATE Reservation SET statut = ? WHERE idReservation = ? AND idPassager = ?";
 
         try (
              PreparedStatement statement = Connexion.con.prepareStatement(modificationQuery)) {
@@ -187,20 +188,53 @@ public class Passager extends Personne {
                     // Vérifier le mot de passe haché avec BCrypt
                     if (BCrypt.checkpw(motDePasse, motDePasseBD)) {
                         int idPersonneBD = resultSet.getInt("idPersonne");
-                        System.out.println("Vous êtes connecté en tant que passager (ID : " + idPersonne + ")");
+                        BienvenuePassager(Connexion.con, email);
                         return idPersonneBD; // Connexion réussie
                     } else {
-                        System.out.println("Identifiants incorrects. Connexion échouée.");
+                        System.out.println(Color.ANSI_RED+"⚠️Identifiants incorrects. Connexion échouée.\n"+Color.ANSI_RESET);
                         return -1; // Mot de passe incorrect
                     }
                 } else {
-                    System.out.println("Adresse e-mail non trouvée. Connexion échouée.");
+                    System.out.println(Color.ANSI_RED+"⚠️Adresse e-mail non trouvée. Connexion échouée.\n"+Color.ANSI_RESET);
                     return -1; // Adresse e-mail non trouvée dans la base de données
                 }
             }
         } catch (SQLException e) {
             System.err.println("Erreur lors de la connexion : " + e.getMessage());
             return -1; // Connexion échouée en raison d'une exception SQL
+        }
+    }
+
+    public static boolean isEmailExist(Connection connection,String email) throws SQLException{
+        // Préparer la requête SQL
+        String sql = "SELECT idPersonne FROM Personne WHERE email='"+email+"'";
+        boolean idPersonne = false;
+        try (Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(sql)) {
+
+            // Vérifier si le ResultSet contient des données
+            if (resultSet.next()) {
+                idPersonne = true;
+            }
+        }
+        return idPersonne;
+    }
+
+    private void BienvenuePassager(Connection connection,String email) throws SQLException{
+        // Préparer la requête SQL
+        String sql = "SELECT nom, prenom FROM Personne WHERE email='"+email+"'";
+        int idPersonne = 0;
+        try (Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(sql)) {
+
+            // Vérifier si le ResultSet contient des données
+            if (resultSet.next()) {
+                // Récupérer la valeur unique
+                String nom = resultSet.getString("nom");
+                String prenom = resultSet.getString("prenom");
+
+                System.out.println("\nBIENBENUE,"+ Color.ANSI_GREEN + prenom.toUpperCase() + " " + nom.toUpperCase()+ Color.ANSI_RESET+"\n");
+            }
         }
     }
 }
