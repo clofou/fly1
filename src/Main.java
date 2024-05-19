@@ -20,10 +20,10 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
         Connexion.seConecter();
 
+
 //----------------------------------------------------------------------------
 
         // Le Passager Vient sur L'appli, 3 choix s'offre a lui
-
         while (true){
             String choice = "";
             while (true){
