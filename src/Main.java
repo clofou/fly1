@@ -1,51 +1,250 @@
 import models.*;
 import org.mindrot.jbcrypt.BCrypt;
+import utils.Color;
 import utils.Date;
+import utils.NameValidator;
+
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.Objects;
 import java.util.Scanner;
 
+import static models.util.*;
 import static utils.Date.lireDateValide;
 
 public class Main {
     public static void main(String[] args) throws SQLException {
+        /* Chargement des fonctions Necessaire pour Executer le script,
+        le scanner et la connexion a la base
+         */
         Scanner scanner = new Scanner(System.in);
         Connexion.seConecter();
 
-        InscriptionPassager();
 
+//----------------------------------------------------------------------------
+
+        // Le Passager Vient sur L'appli, 3 choix s'offre a lui
         while (true){
-            int idPassager = ConnexionPassager();
-            if(idPassager != -1){
-                Reservation r = new Reservation();
-                r.EffecuterReservation(idPassager);
-                break;
+            String choice = "";
+            while (true){
+                System.out.println(Color.ANSI_BLUE +"--- Choisissez Une Option ---" + Color.ANSI_RESET);
+                System.out.println("1- S'inscrire");
+                System.out.println("2- Se Connecter");
+                System.out.println("0- Quitter L'application ⚠️ !!!");
+                choice = scanner.next();
+                if(Objects.equals(choice, "1") || Objects.equals(choice, "2")){
+                    break;
+                } else if (choice.equals("0")) {
+                    System.exit(0);
+                } else {
+                    System.out.println(Color.ANSI_RED+"⚠️ Choix Invalide!!!"+Color.ANSI_RESET);
+                }
             }
+
+            // Si l'utilisateur choisit Le choix 1, il s'inscrit
+            if (choice.equals("1")) {
+                System.out.println("Processus d'inscription declenche ...\n ");
+                InscriptionPassager();
+                continue; // Cette instruction donne la chance a l'utilisateur de se connecter Maintenant
+            }
+
+            // Ici On a le cas ou l'utilisation se connecte
+            if(choice.equals("2")){
+                String callback = "1203";
+                System.out.println(Color.ANSI_BLUE + "\n-------------Page de Connexion------------" + Color.ANSI_RESET);
+                // Ici L'utilisateur Essaie De se Connecter si il echoue, il reprend
+                label:
+                while (true){
+                    int idPassager = ConnexionPassager();
+                    if(idPassager != -1){
+
+                        // --------------MAIN--------------------------
+
+                        // Ce que Peut faire un utilisateur Connecte
+                        // Message de Bienvenue a l'utilisateur Connecte
+
+                        // Affiche une liste d'option de ce que l'utilisateur connecte peut faire
+                        passagerConnecter:
+                        while (true){
+                            String choice1 = "";
+                            while (true){
+                                System.out.println(Color.ANSI_BLUE +"--- Choisissez Une Option ---" + Color.ANSI_RESET);
+                                System.out.println("1- Reserver Un Vol");
+                                System.out.println("2- Liste des reservations effectuees");
+                                System.out.println("0- Se deconnecter ⚠️ !!!");
+                                choice1 = scanner.next();
+                                if(Objects.equals(choice1, "1") || Objects.equals(choice1, "2")){
+                                    break;
+                                } else if (choice1.equals("0")) {
+                                    break;
+                                } else {
+                                    System.out.println(Color.ANSI_RED+"⚠️ Choix Invalide!!!"+Color.ANSI_RESET);
+                                }
+                            }
+                            switch (choice1) {
+                                case "0":
+                                    break label;
+
+
+                                // En fonction des choix effectuer Le Workflow Correspondant
+                                case "1":
+                                    Reservation r = new Reservation();
+                                    r.EffecuterReservation(idPassager);
+
+                                    System.out.println(" ");
+                                    continue; // Cette instruction donne la chance a l'utilisateur de se connecter Maintenant
+
+                                case "2":
+                                    ArrayList<String> listeIdModifiable = detailReservation(idPassager);
+                                    String choice2 = "";
+                                    while (true){
+                                        System.out.println(Color.ANSI_BLUE +"------\n" + Color.ANSI_RESET);
+                                        System.out.println("1- Modifier une reservation");
+                                        System.out.println("2- Annuler une reservation");
+                                        System.out.println("0- Revenir en arriere");
+                                        choice2 = scanner.next();
+                                        if(Objects.equals(choice2, "1") || Objects.equals(choice2, "2")){
+                                            break;
+                                        } else if (choice2.equals("0")) {
+                                            continue passagerConnecter;
+                                        } else {
+                                            System.out.println(Color.ANSI_RED+"⚠️ Choix Invalide!!!"+Color.ANSI_RESET);
+                                        }
+                                    }
+
+                                    if (choice2.equals("1")){
+                                        if (!listeIdModifiable.isEmpty()){
+                                            Reservation r1 = new Reservation();
+                                            r1.modifierReservation(listeIdModifiable, false);
+                                        } else {
+                                            System.out.println(Color.ANSI_YELLOW+"⚠️ La liste est Vide !! "+ Color.ANSI_RESET);
+                                        }
+                                    }
+
+                                    if (choice2.equals("2")){
+                                        if (!listeIdModifiable.isEmpty()){
+                                            Reservation r1 = new Reservation();
+                                            r1.modifierReservation(listeIdModifiable, true);
+                                        } else {
+                                            System.out.println(Color.ANSI_YELLOW+"⚠️ La liste est Vide !! "+ Color.ANSI_RESET);
+                                        }
+                                    }
+
+                                    continue; // Cette instruction donne la chance a l'utilisateur de se connecter Maintenant
+
+                            }
+
+                            break;
+                        }
+                    } else {
+                        System.out.println("Voulez-vous revenir Au menu Inscription-Connexion ? (oui/non)");
+                        System.out.println("Ou tapez 'quit' pour fermer l'application?");
+
+                        callback = scanner.next();
+                        if(callback.equalsIgnoreCase("oui") || callback.equalsIgnoreCase("o")){
+                            break;
+                        }
+                        if (callback.equals("quit")){
+                            System.exit(0);
+                        }
+
+                    }
+
+                }
+                // Ce Code permet de revenir en arriere tout au debut du script
+                if(callback.equalsIgnoreCase("oui") || callback.equalsIgnoreCase("o") || callback.equals("1203")){
+                    continue;
+                }
+            }
+            break;
         }
 
     }
 
+
+
+
+
+
+
+
+
+
+
+
+
     private static void InscriptionPassager() throws SQLException {
         // Workflow pour l'inscription
         Scanner entree = new Scanner(System.in);
-        System.out.println("Veuillez entrer vos informations :\n");
+        System.out.println(Color.ANSI_BLUE + "Veuillez entrer vos informations :\n"+ Color.ANSI_RESET);
         //Nom Passager
-        System.out.println("Votre nom de Famille :");
-        String nom = entree.nextLine();
+        String nom;
+
+        while (true) {
+            System.out.print("Votre nom de Famille : ");
+            nom = entree.nextLine();
+            if (NameValidator.isValidName(nom)) {
+                break;
+            } else {
+                System.out.println(Color.ANSI_RED+"⚠️ Nom Invalide !!!"+Color.ANSI_RESET);
+            }
+        }
         //Prenom Passager
-        System.out.println("Votre Prenom :");
-        String prenom = entree.nextLine();
+        String prenom;
+
+        while (true) {
+            System.out.print("Votre Prenom : ");
+            prenom = entree.nextLine();
+            if (NameValidator.isValidName(prenom)) {
+                break;
+            } else {
+                System.out.println(Color.ANSI_RED+"⚠️ prenom Invalide !!!"+Color.ANSI_RESET);
+            }
+        }
         //Email
-        System.out.println("Votre Email :");
-        String email = entree.nextLine();
+        String email;
+
+        while (true) {
+            System.out.print("Veuillez donner votre E-mail : ");
+            email = entree.nextLine();
+            if (isValidEmail(email)) {
+                if(Passager.isEmailExist(Connexion.con, email) ){
+                    System.out.println(Color.ANSI_RED+"L'email Existe deja dans la base"+Color.ANSI_RESET);
+                    continue;
+                }
+                break;
+            }
+            else {
+                System.out.println(Color.ANSI_RED+"⚠️Email INVALIDE !!!"+Color.ANSI_RESET);
+            }
+        }
         //Numero de telephone
-        System.out.println("Votre numero de telephone :");
-        String numTelephone = entree.nextLine();
+        String numTelephone;
+
+        while (true) {
+            System.out.print("Votre numero de telephone (Format International, Ex: +223 ... ) : ");
+            numTelephone = entree.nextLine();
+            if (isValidInternationalNumber(numTelephone)) {
+                break;
+            } else {
+                System.out.println(Color.ANSI_RED+"⚠️Numero Invalide !!!"+Color.ANSI_RESET);
+            }
+        }
         //Date de Naissance
-        System.out.println("Votre date de naissance");
-        String DateNaissance = new Date(lireDateValide()).formatAnglais();;
+        System.out.print("Votre date de naissance ");
+        String DateNaissance = new Date(lireDateValide()).formatAnglais();
+        ;
         //Mot de Passe
-        System.out.println("Donnez un mot de passe :");
-        String motDePasse = entree.nextLine();
+        String motDePasse;
+        while (true) {
+            System.out.print("Donnez un mot de passe :");
+            motDePasse = entree.nextLine();
+            if (motDePasse.length() < 6) {
+                System.out.println(Color.ANSI_RED+"La longueur du mot de passe doit etre superieur a 6caracteres"+Color.ANSI_RESET);
+                continue;
+            }
+            break;
+        }
         String motDePasseHasher = BCrypt.hashpw(motDePasse, BCrypt.gensalt());
 
         // Instanciation du passager
@@ -55,141 +254,113 @@ public class Main {
 
     }
 
-    private static int ConnexionPassager(){
+    private static int ConnexionPassager() {
         // Connexion du passager à la base de données
         Scanner entree = new Scanner(System.in);
-        System.out.println("Pour vous connecter Veuillez donner votre E-mail : ");
-        String email = entree.nextLine();
-        System.out.println("Donnez votre mot de passe : ");
+        String email;
+
+        while (true){
+            System.out.print("\nVeuillez donner votre E-mail : ");
+            email = entree.nextLine();
+            if (isValidEmail(email)){
+                break;
+            } else {
+                System.out.println(Color.ANSI_RED+ "⚠️Email INVALIDE !!!" + Color.ANSI_RESET);
+            }
+        }
+
+
+        System.out.print("Donnez votre mot de passe : ");
         String motDePasse = entree.nextLine();
         String HashermotDePasseFourni = BCrypt.hashpw(motDePasse, BCrypt.gensalt());
 
-        Passager passager = new Passager(null,null,email,null,null,HashermotDePasseFourni);
+        Passager passager = new Passager(null, null, email, null, null, HashermotDePasseFourni);
         return passager.seConnecter(email, motDePasse);
     }
 
-    private static void ajouterUnAdministrateur() throws SQLException {
-        //Ajout d'un administrateur
-
-        Scanner entree = new Scanner(System.in);
-        System.out.println("Veuillez entrer les informations du nouveau administrateur :\n");
-        //Nom Admin
-        System.out.println("Votre nom de Famille :");
-        String nom = entree.nextLine();
-        //Prenom Admin
-        System.out.println("Votre Prenom :");
-        String prenom = entree.nextLine();
-        //Email
-        System.out.println("Votre Email :");
-        String email = entree.nextLine();
-        //Numero de telephone
-        System.out.println("Votre numero de telephone :");
-        String numTelephone = entree.nextLine();
-        //Date de Naissance
-        String DateNaissance = new Date(lireDateValide()).formatAnglais();;
-        //Mot de Passe
-        System.out.println("Donnez un mot de passe :");
-        String motDePasse = entree.nextLine();
-        String motDePasseHasher = BCrypt.hashpw(motDePasse, BCrypt.gensalt());
-
-    }
-
-    private static int ConnexionAdmin(){
-        // Connexion de l'admin à la base de données
-        Scanner entree = new Scanner(System.in);
-        System.out.println("Pour vous connecter en tant que Admin, veuillez donner votre E-mail : ");
-        String email = entree.nextLine();
-        System.out.println("Donnez votre mot de passe Admin : ");
-        String motDePasse = entree.nextLine();
-        String HashermotDePasseFourni = BCrypt.hashpw(motDePasse, BCrypt.gensalt());
-
-        Admin admin = new Admin(null,null,email,null,null,HashermotDePasseFourni);
-        //admin.seConnecter(email, motDePasse);
-        int connexionAdminReussieIdPersonne = admin.seConnecter(email, motDePasse);
-        if (connexionAdminReussieIdPersonne!=-1){
-            return connexionAdminReussieIdPersonne;
-        }else return -1;
-
-    }
-
     //Les details de reservation effectuer par un passager
-    public void detailReservation (){
-        int IdPassager = ConnexionPassager();
+    private static ArrayList<String> detailReservation(int IdPassager){
+        ArrayList<String> liste = new ArrayList<>();
         if (IdPassager != -1) {
-            String listeReservationIdPersonne = "SELECT r.idReservation, r.dateReservation, r.nombreDePassager, p.idPaiement,\n" +
-                    "                p.montant,\n" +
-                    "                p.modePaiement,\n" +
-                    "                p.datePaiement,\n" +
-                    "                i.id,\n" +
-                    "                i.nomPassagerEtranger,\n" +
-                    "                i.prenomPassagerEtranger,\n" +
-                    "                i.numeroPasseport,\n" +
-                    "                v.idVol,\n" +
-                    "                v.immatriculation,\n" +
-                    "                v.villeDeDepart,\n" +
-                    "                v.villeDArrive,\n" +
-                    "                v.dateDeDepart,\n" +
-                    "                v.dateDArrive,\n" +
-                    "                v.nombreDEscale,\n" +
-                    "                v.tarif,\n" +
-                    "                c.idCategorie,\n" +
-                    "                c.nom AS nomCategorie\n" +
-                    "        FROM\n" +
-                    "        reservation r\n" +
-                    "        JOIN\n" +
-                    "        infopassager i ON r.idReservation = i.idReservation\n" +
-                    "        JOIN\n" +
-                    "        vol v ON i.idVol = v.idVol\n" +
-                    "        LEFT JOIN\n" +
-                    "        paiement p ON r.idReservation = p.idReservation\n" +
-                    "        LEFT JOIN\n" +
-                    "        categorie c ON i.idCategorie = c.idCategorie\n" +
-                    "        WHERE\n" +
-                    "        r.idPassager = ?;";
+            String listeReservationIdPersonne = "SELECT r.idReservation, r.dateReservation, r.nombreDePassager, i.statut, i.id, " +
+                    "i.nomPassagerEtranger, i.prenomPassagerEtranger, i.numeroPasseport,i.idVol, v.idVol, v.immatriculation, " +
+                    "v.villeDeDepart, v.villeDArrive, v.dateDeDepart, v.dateDArrive, v.nombreDEscale, i.tarif, " +
+                    "c.idCategorie, c.nom AS nomCategorie FROM reservation r NATURAL JOIN infopassager i NATURAL JOIN " +
+                    "categorie c JOIN vol v on v.idVol=i.idVol WHERE r.idPassager ="+ IdPassager;
+
+
+            System.out.println(Color.ANSI_PURPLE+"\n                                 --- Details de resevation ---\n");
+            System.out.print(Color.ANSI_WHITE+"id");
+            System.out.print("      idReservation");
+            System.out.print("      dateReservation");
+            System.out.print("      Statut");
+            System.out.print("      nomPassagerEtranger");
+            System.out.print("      prenomPassagerEtranger");
+            System.out.print("      numeroPasseport");
+            System.out.print("      immatriculation Avion");
+            System.out.print("      villeDeDepart");
+            System.out.print("      villeDArrive");
+            System.out.print("      dateDeDepart");
+            System.out.print("      nombreDEscale");
+            System.out.print("      tarif");
+            System.out.println("      nomCategorie"+Color.ANSI_RESET);
+
+            boolean isReser = false;
+
 
             try (PreparedStatement statement = Connexion.con.prepareStatement(listeReservationIdPersonne)) {
 
-                // Paramètre pour la requête SELECT
-                statement.setInt(1, IdPassager);
-
                 // Exécution de la requête SELECT
                 try (ResultSet resultSet = statement.executeQuery()) {
-                    if (resultSet.next()) {
+                    while (resultSet.next()) {
+                        isReser = true;
+
                         int idReservation = resultSet.getInt("r.idReservation");
-                        String dateReservation = resultSet.getString("r.dateReservation");
-                        int nombreDePassager = resultSet.getInt("r.nombreDePassager");
-                        int idPaiement = resultSet.getInt("p.idPaiement");
-                        int montant = resultSet.getInt("p.montant");
-                        String modePaiement = resultSet.getString("p.modePaiement");
-                        String datePaiement = resultSet.getString("p.datePaiement");
                         int id = resultSet.getInt("i.id");
+                        liste.add(String.valueOf(id));
+                        String dateReservation = resultSet.getString("r.dateReservation");
+                        String statut = resultSet.getString("i.statut");
                         String nomPassagerEtranger = resultSet.getString("i.nomPassagerEtranger");
                         String prenomPassagerEtranger = resultSet.getString("i.prenomPassagerEtranger");
-                        int numeroPasseport = resultSet.getInt("i.numeroPasseport");
-                        int idVol = resultSet.getInt("v.idVol");
+                        String numeroPasseport = resultSet.getString("i.numeroPasseport");
                         String immatriculation = resultSet.getString("v.immatriculation");
                         String villeDeDepart = resultSet.getString("v.villeDeDepart");
                         String villeDArrive = resultSet.getString("v.villeDArrive");
                         String dateDeDepart = resultSet.getString("v.dateDeDepart");
-                        String dateDArrive = resultSet.getString("v.dateDArrive");
                         int nombreDEscale = resultSet.getInt("v.nombreDEscale");
-                        int tarif = resultSet.getInt("v.tarif");
-                        int idCategorie = resultSet.getInt("c.idCategorie");
-                        String nom = resultSet.getString("c.nom");
+                        int tarif = resultSet.getInt("i.tarif");
+                        String nomCategorie = resultSet.getString("nomCategorie");
 
-                        System.out.println("Les details de resevation du passager "+IdPassager+"sont :");
-                        System.out.printf("ID Reservation : "+idReservation+"\n" +
-                                "Date Reservation : "+dateReservation+"\n" +
-                                "");
-                    } else {
-                        System.out.println("Pas de reservation disponible pour l'ID :"+IdPassager);
+
+                        System.out.print(ajoutEspace(String.valueOf(id)));
+                        System.out.print("     "+ajoutEspace(String.valueOf(idReservation)));
+                        System.out.print("      "+dateReservation);
+                        System.out.print(Color.ANSI_CYAN+"          "+ajoutEspace(statut)+Color.ANSI_RESET);
+                        System.out.print("         "+ajoutEspace(nomPassagerEtranger));
+                        System.out.print("               "+ajoutEspace(prenomPassagerEtranger));
+                        System.out.print("                  "+ajoutEspace(numeroPasseport));
+                        System.out.print("             "+ajoutEspace(immatriculation));
+                        System.out.print("                  "+ajoutEspace(villeDeDepart));
+                        System.out.print("         "+ajoutEspace(villeDArrive));
+                        System.out.print("       "+dateDeDepart);
+                        System.out.print("             "+nombreDEscale);
+                        System.out.print("             "+tarif);
+                        System.out.println("       "+ajoutEspace(nomCategorie));
                     }
+
                 }
+
+
             } catch (SQLException e) {
-                System.err.println("Erreur lors de la connexion : " + e.getMessage());
+                e.printStackTrace();
+            }
+
+            if (!isReser){
+                System.out.println("                        ⚠️Pas de reservation Disponible .. ⚠️");
             }
 
 
         }
+        return liste;
     }
 }

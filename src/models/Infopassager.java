@@ -1,5 +1,10 @@
 package models;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
 public class Infopassager {
 	private int idReservation;
 	private int idVol ;
@@ -42,6 +47,27 @@ public class Infopassager {
 	}
 	public void setNumeroPasseport(String numeroPasseport) {
 		this.numeroPasseport = numeroPasseport;
+	}
+
+	public static int recupererIdInfoPassager(Connection connection) throws SQLException {
+		// Préparer la requête SQL
+		String sql = "SELECT id FROM infopassager ORDER BY id DESC LIMIT 1";
+		int id = 0;
+		try (Statement statement = connection.createStatement();
+			 ResultSet resultSet = statement.executeQuery(sql)) {
+
+			// Vérifier si le ResultSet contient des données
+			if (resultSet.next()) {
+				// Récupérer la valeur unique
+				id = resultSet.getInt("id");
+
+				// Utiliser la valeur récupérée
+				// ... votre code ici pour utiliser la valeur 'nomUtilisateur'
+			} else {
+				System.out.println("Aucune donnée trouvée.");
+			}
+		}
+		return id;
 	}
 	
 }

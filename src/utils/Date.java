@@ -24,7 +24,7 @@ public class Date {
         DateTimeFormatter formatterFr = DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.FRENCH);
         LocalDate date = null;
         while (date == null) {
-            System.out.print("Veuillez saisir une date au format JJ/MM/AAAA : ");
+            System.out.print("au format JJ/MM/AAAA : ");
             String dateStr = scanner.nextLine();
             try {
                 date = LocalDate.parse(dateStr, formatterFr);
