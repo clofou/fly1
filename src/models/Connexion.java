@@ -11,11 +11,11 @@ public class Connexion {
 		try {
 		
 			Class.forName("com.mysql.cj.jdbc.Driver");
-			String url="jdbc:mysql://localhost:3306/gestiondevolgroupe1";
+			String url="jdbc:mysql://localhost:8889/gestiondevolgroupe1";
 			String user="root";
-			String pass="";
+			String pass="root";
 			con=DriverManager.getConnection(url,user,pass);
-			System.out.println("Connection reusi ");
+			System.out.println("Connection reussit ");
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
