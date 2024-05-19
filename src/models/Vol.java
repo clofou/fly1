@@ -402,4 +402,25 @@ public class Vol {
         return listeIds;
     }
 
+    public static int recupererVolTarif(Connection connection, int idVol) throws SQLException {
+        // Préparer la requête SQL
+        String sql = "SELECT tarif FROM vol WHERE idVol="+idVol;
+        int mont = 0;
+        try (Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(sql)) {
+
+            // Vérifier si le ResultSet contient des données
+            if (resultSet.next()) {
+                // Récupérer la valeur unique
+                mont = resultSet.getInt("tarif");
+
+                // Utiliser la valeur récupérée
+                // ... votre code ici pour utiliser la valeur 'nomUtilisateur'
+            } else {
+                System.out.println("Aucune donnée trouvée.");
+            }
+        }
+        return mont;
+    }
+
 }
