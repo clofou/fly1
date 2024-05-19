@@ -1,19 +1,25 @@
 package models;
 
+import utils.Color;
+import utils.Date;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.Date;
+import java.util.Objects;
 import java.util.Scanner;
+
+import static models.util.*;
+import static utils.Date.lireDateValide;
 
 public class Paiement {
     private int idPaiement;
     private int montant;
     private String datePaiement;
     private int idReservation;
-    private int idmodePaiement;
-    private int numeroTelephone;
-    private int numeroCarte;
+    private String idmodePaiement;
+    private String numeroTelephone;
+    private String numeroCarte;
     private int numeroCvv;
     private String dateExpiration;
 
@@ -45,24 +51,24 @@ public class Paiement {
         this.idReservation = idReservation;
     }
 
-    private int getIdmodePaiement() {
+    private String getIdmodePaiement() {
         return idmodePaiement;
     }
-    private void setIdmodePaiement(int idmodePaiement) {
+    private void setIdmodePaiement(String idmodePaiement) {
         this.idmodePaiement = idmodePaiement;
     }
 
-    private int getNumeroTelephone() {
+    private String getNumeroTelephone() {
         return numeroTelephone;
     }
-    private void setNumeroTelephone(int numeroTelephone) {
+    private void setNumeroTelephone(String numeroTelephone) {
         this.numeroTelephone = numeroTelephone;
     }
 
-    private int getNumeroCarte() {
+    private String getNumeroCarte() {
         return numeroCarte;
     }
-    private void setNumeroCarte(int numeroCarte) {
+    private void setNumeroCarte(String numeroCarte) {
         this.numeroCarte = numeroCarte;
     }
 
@@ -80,84 +86,108 @@ public class Paiement {
         this.dateExpiration = dateExpiration;
     }
 
-    public static void ajouterPaiement(){
+    public static void ajouterPaiement(int montant, int idReservation, Scanner c){
         Paiement p = new Paiement();
 
-        try (Scanner c = new Scanner(System.in)) {
 
-            System.out.println("Veuillez saisir les informations de paiement :");
-            System.out.println("Entre le montant a payer :");
-            p.setMontant(c.nextInt());
 
-            System.out.println("Entre l'identifient de la reservation");
-            p.setIdReservation(c.nextInt());
+            System.out.println(Color.ANSI_PURPLE+"Veuillez saisir les informations de paiement :"+Color.ANSI_RESET);
 
-            System.out.println("mode de paiement : ");
-            System.out.println("1:OM , 2:Carte Bancaire : ");
-            p.setIdmodePaiement(c.nextInt());
+            while (true){
+                System.out.println("Mode de paiement : ");
+                System.out.println("1:OM , 2:Carte Bancaire : ");
+                p.setIdmodePaiement(c.next());
 
-            if (p.getIdmodePaiement() == 1) {
+                if (Objects.equals(p.getIdmodePaiement(), "1") || Objects.equals(p.getIdmodePaiement(), "2")){
+                    break;
+                } else {
+                    System.out.println(Color.ANSI_RED+"⚠️ Choisissez une option valide !!"+Color.ANSI_RESET);
+                }
+            }
+
+
+            System.out.println(Color.ANSI_YELLOW+"Le montant " + montant + " Sera retire de votre compte."+Color.ANSI_RESET);
+            p.setMontant(montant);
+
+            p.setIdReservation(idReservation);
+
+
+
+            if (Objects.equals(p.getIdmodePaiement(), "1")) {
                 // Traitement pour le mode de paiement OM
-                System.out.println("numéro OM  : ");
-                p.setNumeroTelephone(c.nextInt());
-            } else if (p.getIdmodePaiement() == 2) {
+                //Numero de telephone
+                String numTelephone;
+
+                while (true) {
+                    System.out.print("Votre numero de telephone OM (Format International, Ex: +223 ... ) : ");
+                    p.setNumeroTelephone(c.next());
+                    if (isValidInternationalNumber(p.getNumeroTelephone())) {
+                        break;
+                    } else {
+                        System.out.println(Color.ANSI_RED+"⚠️Numero Invalide !!!"+Color.ANSI_RESET);
+                    }
+                }
+
+            }
+
+            if (Objects.equals(p.getIdmodePaiement(), "2")) {
                 // Traitement pour le mode de paiement par carte bancaire
+                String numeroCarte;
                 while (true) {
                     System.out.print("Entrez votre numéro de carte bancaire (14 chiffres) : ");
-                    int numeroCarte = c.nextInt();
-                    if (String.valueOf(numeroCarte).length() == 14) {
-                        p.setNumeroCarte(numeroCarte);
+                    numeroCarte = c.next();
+                    if (hasFourteenOrAnyDigits(numeroCarte, 14)) {
+
                         break;
                     } else {
-                        System.out.println("Erreur : Le numéro de carte bancaire doit comporter 14 chiffres.");
+                        System.out.println(Color.ANSI_RED+"Erreur : Le numéro de carte bancaire doit comporter 14 chiffres."+Color.ANSI_RESET);
                     }
                 }
+                p.setNumeroCarte(numeroCarte);
 
                 while (true) {
-                    System.out.println("Entre le numero CVV de votre carte (3 chiffres) :");
-                    int numeroCvv = c.nextInt();
-                    if (String.valueOf(numeroCvv).length() == 3) {
-                        p.setNumeroCvv(numeroCvv);
+                    System.out.print("Entre le numero CVV de votre carte (3 chiffres) :");
+                    String numeroCvv = c.next();
+                    if (hasFourteenOrAnyDigits(numeroCvv, 3)) {
+                        p.setNumeroCvv(Integer.parseInt(numeroCvv));
                         break;
                     } else {
-                        System.out.println("Erreur : Le numéro CVV doit comporter 3 chiffres.");
+                        System.out.println(Color.ANSI_RED+"Erreur : Le numéro CVV doit comporter 3 chiffres."+Color.ANSI_RESET);
                     }
                 }
-            } else {
-                System.out.println("Mode de paiement invalide");
-                return;
+
+                System.out.print("Entre la date d'expiration de votre carte ");
+                p.setDateExpiration(new Date(lireDateValide()).formatAnglais());
             }
 
-            if (p.getIdmodePaiement() == 2) {
-                System.out.println("Entre la date d'expiration de votre carte (au format YYYY-MM-DD): ");
-                p.setDateExpiration(c.next());
-            }
-        }
 
-        String sql = "INSERT INTO paiement (montant, datePaiement, idReservation, idmodePaiement, numeroTelephone, numeroCarte, numeroCvv, dateExpiration) VALUES (?, NOW(), ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO paiement (montant, datePaiement, idReservation, modePaiement, numeroTelephone, numeroCarte, numeroCvv, dateExpiration) VALUES (?, NOW(), ?, ?, ?, ?, ?, ?)";
         Connexion.seConecter();
         try {
-            //(Connection connection = Connexion.seConnecter();
             PreparedStatement ps = Connexion.con.prepareStatement(sql);
             ps.setInt(1, p.getMontant());
             ps.setInt(2, p.getIdReservation());
-            ps.setInt(3, p.getIdmodePaiement());
-            if (p.getIdmodePaiement() == 1) {
-                ps.setLong(4, p.getNumeroTelephone());
+            ps.setInt(3, Integer.parseInt(p.getIdmodePaiement()));
+            if (Objects.equals(p.getIdmodePaiement(), "1")) {
+                ps.setString(4, p.getNumeroTelephone());
                 ps.setNull(5, java.sql.Types.BIGINT);
                 ps.setNull(6, java.sql.Types.INTEGER);
                 ps.setNull(7, java.sql.Types.VARCHAR);
             } else {
                 ps.setNull(4, java.sql.Types.BIGINT);
-                ps.setLong(5, p.getNumeroCarte());
+                ps.setString(5, p.getNumeroCarte());
                 ps.setInt(6, p.getNumeroCvv());
                 ps.setString(7, p.getDateExpiration());
             }
 
             ps.executeUpdate();
-            System.out.println("Enregistrement effectué avec succès !!!");
+            System.out.println("Paiement en cours ...");
+            Thread.sleep(2000);
+            System.out.println(Color.ANSI_GREEN+"Paiement effectué avec succès !!!"+Color.ANSI_RESET);
         } catch (SQLException e) {
             e.printStackTrace();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 
