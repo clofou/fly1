@@ -48,7 +48,7 @@ public class Main {
                 continue; // Cette instruction donne la chance a l'utilisateur de se connecter Maintenant
             }
 
-            // Ici On a le cas ou l'utilisation se connecte
+            // Ici On a le cas ou l'utilisateur se connecte
             if(choice.equals("2")){
                 String callback = "1203";
                 System.out.println(Color.ANSI_BLUE + "\n-------------Page de Connexion------------" + Color.ANSI_RESET);

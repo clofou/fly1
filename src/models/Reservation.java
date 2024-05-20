@@ -244,7 +244,7 @@ public class Reservation {
 			// Id du Champ a modifier
 			String id;
 			while (true){
-				System.out.print("Choisissez l'identifiant du champ à modifier : ");
+				System.out.print("Choisissez l'identifiant de la reservation à modifier : ");
 				id = c.next();
 
 				if (lisIdModifiable.contains(id)){

@@ -1,12 +1,18 @@
 package models;
 
+import utils.Color;
+
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static models.util.ajoutEspace;
 
 public class CompagnieAerienne {
 	private String nomCompagnie;
@@ -153,5 +159,56 @@ public class CompagnieAerienne {
 			e.printStackTrace();
 			return null;
 		}
+	}
+
+	private static ArrayList<String> ListeCompagnie(int IdAdmin){
+		ArrayList<String> liste = new ArrayList<>();
+		if (IdAdmin != -1) {
+			String listeCompagnie = "SELECT * FROM compagnie";
+
+
+			System.out.println(Color.ANSI_PURPLE+"\n                                 --- Details de resevation ---\n");
+			System.out.print(Color.ANSI_WHITE+"id Compagnie");
+			System.out.print("      Nom Compagnie");
+			System.out.print("      Mot de Passe");
+			System.out.print("      Site Web");
+
+			boolean isReser = false;
+
+
+			try (PreparedStatement statement = Connexion.con.prepareStatement(listeCompagnie)) {
+
+				// Exécution de la requête SELECT
+				try (ResultSet resultSet = statement.executeQuery()) {
+					while (resultSet.next()) {
+						isReser = true;
+
+						int idCompagnie = resultSet.getInt("idCompagnie");
+						String nomCompagnie = resultSet.getString("nomCompagnie");
+						String motDePasse = resultSet.getString("motDePasse");
+						String siteWeb = resultSet.getString("siteWeb");
+
+
+						System.out.print(ajoutEspace(String.valueOf(idCompagnie)));
+						System.out.print("     "+ajoutEspace(String.valueOf(nomCompagnie)));
+						System.out.print("      "+motDePasse);
+						System.out.print(Color.ANSI_CYAN+"          "+ajoutEspace(siteWeb)+Color.ANSI_RESET);
+
+					}
+
+				}
+
+
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+
+			if (!isReser){
+				System.out.println("                        ⚠️Pas de Compagnie inserée .. ⚠️");
+			}
+
+
+		}
+		return liste;
 	}
 }
