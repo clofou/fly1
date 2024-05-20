@@ -6,7 +6,8 @@ import java.sql.SQLException;
 
 public class Connexion {
 	public static Connection con;
-	public static void seConecter() {
+
+    public static void seConecter() {
 		try {
 		
 			Class.forName("com.mysql.cj.jdbc.Driver");
@@ -14,7 +15,7 @@ public class Connexion {
 			String user="root";
 			String pass="";
 			con=DriverManager.getConnection(url,user,pass);
-			System.out.println("Connection reusi ");
+			System.out.println("Connection reussit ");
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

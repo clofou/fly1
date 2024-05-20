@@ -1,14 +1,16 @@
 package models;
-
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.mindrot.jbcrypt.BCrypt;
 
 public class util {
+
     //Methode pour obtenir la date sous format AAAA-MM-JJ
     public static String Date(){
         Scanner entree = new Scanner(System.in);
@@ -48,6 +50,7 @@ public class util {
                 isIntMois = false;
             }
         } while (!isIntMois);
+
         //Annee de naissance
         boolean isIntAnnee;
         int anneeNaissance = 0;
@@ -100,4 +103,68 @@ public class util {
     }
 
 
+    // Méthode pour vérifier si l'email est valide
+    public static boolean isValidEmail(String email) {
+        String emailRegex = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,7}$";
+        Pattern pattern = Pattern.compile(emailRegex);
+        if (email == null) {
+            return false;
+        }
+        Matcher matcher = pattern.matcher(email);
+        return matcher.matches();
+    }
+
+    public static boolean isValidInternationalNumber(String phoneNumber) {
+        return Pattern.matches("^\\+(?:[0-9] ?){6,14}[0-9]$", phoneNumber);
+    }
+
+    public static boolean isBlank(String str) {
+        int len = (str == null) ? 0 : str.length();
+        for (int i = 0; i < len; i++) {
+            if (!Character.isWhitespace(str.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
+    public static String ajoutEspace(String s){
+        StringBuilder sBuilder = new StringBuilder(s);
+        if (sBuilder.length() > 8){
+            return sBuilder.substring(0, 7) + "..";
+        }
+        while (sBuilder.length() <= 8){
+            sBuilder.append(" ");
+        }
+
+        s = sBuilder.toString();
+        return s;
+    }
+
+    public static boolean isValidPassport(String passportNumber) {
+        final Pattern PASSPORT_PATTERN = Pattern.compile("^[a-zA-Z0-9]{9}$");
+        if (passportNumber == null) {
+            return false;
+        }
+        return PASSPORT_PATTERN.matcher(passportNumber).matches();
+    }
+
+    public static boolean hasFourteenOrAnyDigits(String input, int number) {
+        if (input == null) {
+            return false;
+        }
+
+        // Vérifier que la chaîne a exactement 14 caractères
+        if (input.length() != number) {
+            return false;
+        }
+
+        // Vérifier que tous les caractères sont des chiffres
+        for (int i = 0; i < input.length(); i++) {
+            if (!Character.isDigit(input.charAt(i))) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }
