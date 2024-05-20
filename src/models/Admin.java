@@ -97,8 +97,8 @@ public class Admin extends Personne {
     public int seConnecter(String email, String motDePasse) {
         String selectPassagerQuery = "SELECT idPersonne, motDePasse FROM Personne WHERE email = ?";
 
-        try (Connection connection = Connexion.con;
-             PreparedStatement statement = connection.prepareStatement(selectPassagerQuery)) {
+        try (
+             PreparedStatement statement = Connexion.con.prepareStatement(selectPassagerQuery)) {
 
             // Paramètre pour la requête SELECT
             statement.setString(1, email);
