@@ -1,9 +1,10 @@
-import models.Admin;
-import models.Connexion;
+import models.*;
 import org.mindrot.jbcrypt.BCrypt;
+import utils.Color;
 import utils.Date;
 
 import java.sql.SQLException;
+import java.util.Objects;
 import java.util.Scanner;
 
 import static models.util.isValidEmail;
@@ -11,9 +12,126 @@ import static models.util.isValidInternationalNumber;
 import static utils.Date.lireDateValide;
 
 public class MainAdmin {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws SQLException {
         Scanner scanner = new Scanner(System.in);
         Connexion.seConecter();
+
+        //ajouterUnAdministrateur();
+
+        while (true){
+            String choice = "";
+            while (true){
+                System.out.println(Color.ANSI_BLUE +"--- Choisissez Une Option ---" + Color.ANSI_RESET);
+                System.out.println("1- Se Connecter");
+                System.out.println("0- Quitter L'application ⚠️ !!!");
+                choice = scanner.next();
+                if(Objects.equals(choice, "1")){
+                    break;
+                } else if (choice.equals("0")) {
+                    System.exit(0);
+                } else {
+                    System.out.println(Color.ANSI_RED+"⚠️ Choix Invalide!!!"+Color.ANSI_RESET);
+                }
+            }
+
+            // Ici On a le cas ou l'utilisation se connecte
+            if(choice.equals("1")){
+                String callback = "1203";
+                System.out.println(Color.ANSI_BLUE + "\n-------------Page de Connexion------------" + Color.ANSI_RESET);
+                // Ici L'utilisateur Essaie De se Connecter si il echoue, il reprend
+                label:
+                while (true){
+                    int idAdmin = ConnexionAdmin();
+                    if(idAdmin != -1){
+
+                        // --------------MAIN--------------------------
+
+                        // Ce que Peut faire un utilisateur Connecte
+                        // Message de Bienvenue a l'utilisateur Connecte
+
+                        // Affiche une liste d'option de ce que l'utilisateur connecte peut faire
+                        adminConnecter:
+                        while (true){
+                            String choice1 = "";
+                            while (true){
+                                System.out.println(Color.ANSI_BLUE +"--- Choisissez Une Option ---" + Color.ANSI_RESET);
+                                System.out.println("1- Ajouter une compagnie");
+                                System.out.println("2- Modifier une compagnie");
+                                System.out.println("3- Supprimer une Compagnie");
+                                System.out.println("4- Liste des compagnies");
+                                System.out.println("5- Ajouter Pays");
+                                System.out.println("6- Ajouter Ville");
+                                System.out.println("7- Ajouter Un Vol");
+                                System.out.println("8- Ajouter Avion");
+                                System.out.println("0- Se deconnecter ⚠️ !!!");
+                                choice1 = scanner.next();
+                                if(Objects.equals(choice1, "1") || Objects.equals(choice1, "2") || Objects.equals(choice1, "3")|| Objects.equals(choice1, "4")|| Objects.equals(choice1, "5")|| Objects.equals(choice1, "6")|| Objects.equals(choice1, "7")|| Objects.equals(choice1, "8")){
+                                    break;
+                                } else if (choice1.equals("0")) {
+                                    break;
+                                } else {
+                                    System.out.println(Color.ANSI_RED+"⚠️ Choix Invalide!!!"+Color.ANSI_RESET);
+                                }
+                            }
+                            CompagnieAerienne a = new CompagnieAerienne();
+                            switch (choice1) {
+                                case "0":
+                                    break label;
+
+
+                                // En fonction des choix effectuer Le Workflow Correspondant
+                                case "1":
+                                    a.AjouterCompagnie();
+
+                                    System.out.println(" ");
+                                    continue; // Cette instruction donne la chance a l'utilisateur de se connecter Maintenant
+
+                                case "2":
+                                case "4":
+                                case "3":
+                                    continue ;
+                                case "5":
+                                    Pays.ajouterPays(Connexion.con, scanner);
+                                    continue ;
+                                case "6":
+                                    Ville.ajouterUneVille();
+                                    continue ;
+                                case "7":
+                                    Vol.ajouterVol(Connexion.con, scanner);
+                                    continue ;
+                                case "8":
+                                    Avion d = new Avion();
+                                    d.AjouterAvions();
+                                    continue ;
+
+
+                            }
+
+                            break;
+                        }
+                    } else {
+                        System.out.println("Voulez-vous revenir Au menu Inscription-Connexion ? (oui/non)");
+                        System.out.println("Ou tapez 'quit' pour fermer l'application?");
+
+                        callback = scanner.next();
+                        if(callback.equalsIgnoreCase("oui") || callback.equalsIgnoreCase("o")){
+                            break;
+                        }
+                        if (callback.equals("quit")){
+                            System.exit(0);
+                        }
+
+                    }
+
+                }
+                // Ce Code permet de revenir en arriere tout au debut du script
+                if(callback.equalsIgnoreCase("oui") || callback.equalsIgnoreCase("o") || callback.equals("1203")){
+                    continue;
+                }
+            }
+            break;
+        }
+
     }
 
     private static void ajouterUnAdministrateur() throws SQLException {
