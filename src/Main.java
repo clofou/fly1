@@ -11,6 +11,7 @@ public class Main {
         Connexion.seConecter();
         //int IdPassager = ConnexionPassager();
         //System.out.println("l'Id du passager connecter est : "+ IdPassager);
+        InscriptionPassager();
 
 
 
@@ -27,8 +28,27 @@ public class Main {
         System.out.println("Votre Prenom :");
         String prenom = entree.nextLine();
         //Email
-        System.out.println("Votre Email :");
-        String email = entree.nextLine();
+        boolean emailExiste = false;
+        String email;
+        do{
+            System.out.println("Veuillez donner votre E-mail : ");
+            email = entree.nextLine();
+            String chercheEmail = "SELECT idPersonne FROM Personne WHERE email = ?";
+            try (PreparedStatement statement = Connexion.con.prepareStatement(chercheEmail)) {
+                statement.setString(1, email);
+                ResultSet resultSet = statement.executeQuery();
+                if (resultSet.next()) {
+                    System.out.println("Ce passager est déjà inscrit. " +
+                            "Veuillez donner un autre e-mail ou vous connecter à votre compte.");
+                    emailExiste = true;
+                } else {
+                    emailExiste = false;
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+                emailExiste = true; // en cas d'erreur de base de données, continuez à demander
+            }
+        }while (emailExiste);
         //Numero de telephone
         System.out.println("Votre numero de telephone :");
         String numTelephone = entree.nextLine();
@@ -45,10 +65,10 @@ public class Main {
         passager.inscription();
     }
 
-    private static int ConnexionPassager(){
+    private static int ConnexionPassager() throws SQLException {
         // Connexion du passager à la base de données
         Scanner entree = new Scanner(System.in);
-        System.out.println("Pour vous connecter Veuillez donner votre E-mail : ");
+        System.out.println("Pour vous connecter, veuillez donner votre email : ");
         String email = entree.nextLine();
         System.out.println("Donnez votre mot de passe : ");
         String motDePasse = entree.nextLine();
@@ -107,83 +127,96 @@ public class Main {
     }
 
     //Les details de reservation effectuer par un passager
-    public void detailReservation (){
+    public static void detailReservation() throws SQLException {
         int IdPassager = ConnexionPassager();
         if (IdPassager != -1) {
-            String listeReservationIdPersonne = "SELECT r.idReservation, r.dateReservation, r.nombreDePassager, p.idPaiement,\n" +
-                    "                p.montant,\n" +
-                    "                p.modePaiement,\n" +
-                    "                p.datePaiement,\n" +
-                    "                i.id,\n" +
-                    "                i.nomPassagerEtranger,\n" +
-                    "                i.prenomPassagerEtranger,\n" +
-                    "                i.numeroPasseport,\n" +
-                    "                v.idVol,\n" +
-                    "                v.immatriculation,\n" +
-                    "                v.villeDeDepart,\n" +
-                    "                v.villeDArrive,\n" +
-                    "                v.dateDeDepart,\n" +
-                    "                v.dateDArrive,\n" +
-                    "                v.nombreDEscale,\n" +
-                    "                v.tarif,\n" +
-                    "                c.idCategorie,\n" +
-                    "                c.nom AS nomCategorie\n" +
-                    "        FROM\n" +
-                    "        reservation r\n" +
-                    "        JOIN\n" +
-                    "        infopassager i ON r.idReservation = i.idReservation\n" +
-                    "        JOIN\n" +
-                    "        vol v ON i.idVol = v.idVol\n" +
-                    "        LEFT JOIN\n" +
-                    "        paiement p ON r.idReservation = p.idReservation\n" +
-                    "        LEFT JOIN\n" +
-                    "        categorie c ON i.idCategorie = c.idCategorie\n" +
-                    "        WHERE\n" +
-                    "        r.idPassager = ?;";
+            String InfoReservation = "SELECT \n" +
+                    "    r.idReservation,\n" +
+                    "    r.dateReservation,\n" +
+                    "    r.nombreDePassager,\n" +
+                    "    p.montant AS montantPaiement,\n" +
+                    "    p.modePaiement,\n" +
+                    "    p.datePaiement,\n" +
+                    "    c.nom AS categorie,\n" +
+                    "    v.immatriculation,\n" +
+                    "    v.villeDeDepart,\n" +
+                    "    v.villeDArrive,\n" +
+                    "    v.dateDeDepart,\n" +
+                    "    v.dateDArrive,\n" +
+                    "    v.nombreDEscale,\n" +
+                    "    v.tarif,\n" +
+                    "    ip.nomPassagerEtranger AS nomPassager,\n" +
+                    "    ip.prenomPassagerEtranger AS prenomPassager,\n" +
+                    "    ip.numeroPasseport\n" +
+                    "FROM \n" +
+                    "    reservation r\n" +
+                    "LEFT JOIN \n" +
+                    "    paiement p ON r.idReservation = p.idReservation\n" +
+                    "LEFT JOIN \n" +
+                    "    infopassager ip ON r.idReservation = ip.idReservation\n" +
+                    "LEFT JOIN \n" +
+                    "    vol v ON ip.idVol = v.idVol\n" +
+                    "LEFT JOIN \n" +
+                    "    categorie c ON ip.idCategorie = c.idCategorie\n" +
+                    "WHERE \n" +
+                    "    r.idPassager = ?\n" +
+                    "ORDER BY\n" +
+                    "    r.dateReservation DESC;\n";
 
-            try (PreparedStatement statement = Connexion.con.prepareStatement(listeReservationIdPersonne)) {
+            try (PreparedStatement statementInfoReservation = Connexion.con.prepareStatement(InfoReservation)) {
+                statementInfoReservation.setInt(1, IdPassager);
 
-                // Paramètre pour la requête SELECT
-                statement.setInt(1, IdPassager);
+                try (ResultSet resultSetInfoReservation = statementInfoReservation.executeQuery()) {
+                    if (resultSetInfoReservation.next()) {
+                        do {
+                            int idReservation = resultSetInfoReservation.getInt("idReservation");
+                            String dateReservation = resultSetInfoReservation.getString("dateReservation");
+                            int nombreDePassager = resultSetInfoReservation.getInt("nombreDePassager");
+                            int montantPaiement = resultSetInfoReservation.getInt("montantPaiement");
+                            String modePaiement = resultSetInfoReservation.getString("modePaiement");
+                            String datePaiement = resultSetInfoReservation.getString("datePaiement");
+                            String categorie = resultSetInfoReservation.getString("categorie");
+                            String immatriculation = resultSetInfoReservation.getString("immatriculation");
+                            String villeDeDepart = resultSetInfoReservation.getString("villeDeDepart");
+                            String villeDArrive = resultSetInfoReservation.getString("villeDArrive");
+                            String dateDeDepart = resultSetInfoReservation.getString("dateDeDepart");
+                            String dateDArrive = resultSetInfoReservation.getString("dateDArrive");
+                            int nombreDEscale = resultSetInfoReservation.getInt("nombreDEscale");
+                            int tarif = resultSetInfoReservation.getInt("tarif");
+                            String nomPassager = resultSetInfoReservation.getString("nomPassager");
+                            String prenomPassager = resultSetInfoReservation.getString("prenomPassager");
+                            String numeroPasseport = resultSetInfoReservation.getString("numeroPasseport");
 
-                // Exécution de la requête SELECT
-                try (ResultSet resultSet = statement.executeQuery()) {
-                    if (resultSet.next()) {
-                        int idReservation = resultSet.getInt("r.idReservation");
-                        String dateReservation = resultSet.getString("r.dateReservation");
-                        int nombreDePassager = resultSet.getInt("r.nombreDePassager");
-                        int idPaiement = resultSet.getInt("p.idPaiement");
-                        int montant = resultSet.getInt("p.montant");
-                        String modePaiement = resultSet.getString("p.modePaiement");
-                        String datePaiement = resultSet.getString("p.datePaiement");
-                        int id = resultSet.getInt("i.id");
-                        String nomPassagerEtranger = resultSet.getString("i.nomPassagerEtranger");
-                        String prenomPassagerEtranger = resultSet.getString("i.prenomPassagerEtranger");
-                        int numeroPasseport = resultSet.getInt("i.numeroPasseport");
-                        int idVol = resultSet.getInt("v.idVol");
-                        String immatriculation = resultSet.getString("v.immatriculation");
-                        String villeDeDepart = resultSet.getString("v.villeDeDepart");
-                        String villeDArrive = resultSet.getString("v.villeDArrive");
-                        String dateDeDepart = resultSet.getString("v.dateDeDepart");
-                        String dateDArrive = resultSet.getString("v.dateDArrive");
-                        int nombreDEscale = resultSet.getInt("v.nombreDEscale");
-                        int tarif = resultSet.getInt("v.tarif");
-                        int idCategorie = resultSet.getInt("c.idCategorie");
-                        String nom = resultSet.getString("c.nom");
-
-                        System.out.println("Les details de resevation du passager "+IdPassager+"sont :");
-                        System.out.printf("ID Reservation : "+idReservation+"\n" +
-                                "Date Reservation : "+dateReservation+"\n" +
-                                "");
+                            System.out.println("Les détails de réservation du passager " + IdPassager + " sont :");
+                            System.out.println("ID Réservation : " + idReservation);
+                            System.out.println("Date Réservation : " + dateReservation);
+                            System.out.println("Nombre de Passagers : " + nombreDePassager);
+                            System.out.println("Montant Paiement : " + montantPaiement);
+                            System.out.println("Mode Paiement : " + modePaiement);
+                            System.out.println("Date Paiement : " + datePaiement);
+                            System.out.println("Catégorie : " + categorie);
+                            System.out.println("Immatriculation : " + immatriculation);
+                            System.out.println("Ville de Départ : " + villeDeDepart);
+                            System.out.println("Ville d'Arrivée : " + villeDArrive);
+                            System.out.println("Date de Départ : " + dateDeDepart);
+                            System.out.println("Date d'Arrivée : " + dateDArrive);
+                            System.out.println("Nombre d'Escales : " + nombreDEscale);
+                            System.out.println("Tarif : " + tarif);
+                            System.out.println("Nom Passager : " + nomPassager);
+                            System.out.println("Prénom Passager : " + prenomPassager);
+                            System.out.println("Numéro Passeport : " + numeroPasseport);
+                            System.out.println("------------------------------------------");
+                        } while (resultSetInfoReservation.next());
                     } else {
-                        System.out.println("Pas de reservation disponible pour l'ID :"+IdPassager);
+                        System.out.println("Pas de réservation disponible pour l'ID : " + IdPassager);
                     }
                 }
             } catch (SQLException e) {
                 System.err.println("Erreur lors de la connexion : " + e.getMessage());
             }
-
-
         }
     }
+
+
+
 }
