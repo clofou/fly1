@@ -2,12 +2,14 @@ package models;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.Scanner;
 
 import models.Connexion;
 import utils.Color;
 import utils.NameValidator;
 
+import static models.util.isValidPassport;
 import static utils.Date.lireDateValide;
 
 public class Reservation {
@@ -45,30 +47,34 @@ public class Reservation {
 
 	public void EffecuterReservation(int id_passager) throws SQLException {
 		String sql="INSERT INTO reservation(idPassager,dateReservation,nombreDePassager) values(?,?,?)";
+		int montantTotal = 0;
+		ArrayList<Integer> listeIdPassager = new ArrayList<Integer>();
 
 		Reservation r=new Reservation();
 		System.out.println(Color.ANSI_BLUE+"----- Renseignez les informations concernant la reservation. -----\n"+Color.ANSI_RESET);
 		r.setId_passager(id_passager);
+
 		String villeDepa;
 		while (true){
 			System.out.print("Choisissez la ville de Depart : ");
 			ArrayList<String> listeDeVille = Ville.listeDeVille(Connexion.con);
 			villeDepa = c.next();
-			if (listeDeVille.contains(villeDepa)){
+			if (listeDeVille.contains(villeDepa.toLowerCase())){
 				break;
 			} else {
 				System.out.println(Color.ANSI_RED+"La Ville que vous avez entrer ne figure pas dans la liste des villes enregistree\n"+Color.ANSI_RESET);
 			}
 		}
 
-
-		System.out.print("Choisissez la ville D'arrivee : ");
 		String villeDArrive;
 		while (true){
 			System.out.print("Choisissez la ville d'arrive : ");
 			ArrayList<String> listeDeVille = Ville.listeDeVille(Connexion.con);
 			villeDArrive = c.next();
-			if (listeDeVille.contains(villeDArrive)){
+			if(villeDepa.toLowerCase().equals(villeDArrive.toLowerCase())){
+				System.out.println(Color.ANSI_RED+"La Ville que vous avez entrer correspond au ville de depart\n"+Color.ANSI_RESET);
+			}
+			else if (listeDeVille.contains(villeDArrive.toLowerCase())){
 				break;
 			} else {
 				System.out.println(Color.ANSI_RED+"La Ville que vous avez entrer ne figure pas dans la liste des villes enregistree\n"+Color.ANSI_RESET);
@@ -94,25 +100,27 @@ public class Reservation {
 
 
 		// Affiche La liste des Vols Correspondants
-		boolean isVolDispo = Vol.volDispoAUneDate(Connexion.con, r.getDate_reservation(),a,villeDepa, villeDArrive);
+		ArrayList<String> listIdVol = Vol.volDispoAUneDate(Connexion.con, r.getDate_reservation(),a,villeDepa, villeDArrive);
+		boolean isVolDispo = !listIdVol.isEmpty();
 
-		if (isVolDispo){
+        if (isVolDispo){
 			Infopassager i=new Infopassager();
-			ArrayList<Integer> listIdVol = Vol.listeDesIds(Connexion.con);
+			String stIdVol;
 			while (true){
 				System.out.print("Choisissez votre numero vol : ");
-				i.setIdVol(c.nextInt());
-				if(listIdVol.contains(i.getIdVol())){
+				stIdVol = c.next();
+
+				if(listIdVol.contains(stIdVol)){
 					break;
 				} else {
 					System.out.println(Color.ANSI_RED+" ⚠️ Le Vol Selectionne n'existe pas"+Color.ANSI_RESET);
 				}
 			}
+			i.setIdVol(Integer.parseInt(stIdVol));
 
 
 			if(a>0) {
 				try {
-					Connexion.seConecter();
 					PreparedStatement ps=Connexion.con.prepareStatement(sql);
 					ps.setInt(1, r.getId_passager());ps.setString(2, r.getDate_reservation());
 					ps.setInt(3, r.getNbre_de_passager());ps.execute();
@@ -123,24 +131,46 @@ public class Reservation {
 					e.printStackTrace();
 
 				}
-				String rq="INSERT INTO infopassager(idReservation,idVol,idCategorie,nomPassagerEtranger,prenomPassagerEtranger,numeroPasseport) "
-						+ "values(?,?,?,?,?,?)";
+				String rq="INSERT INTO infopassager(idReservation,idVol,idCategorie,nomPassagerEtranger,prenomPassagerEtranger,numeroPasseport, statut, tarif) "
+						+ "values(?,?,?,?,?,?,?,?)";
 				for(int j=1;j<= a;j++) {
 
 					System.out.println(Color.ANSI_PURPLE+"			Enregistrer la personne "+j +"\n"+Color.ANSI_RESET);
 
 					i.setIdReservation(recupererIdReservation(Connexion.con));
 
+					// Choix De la Categorie
 					System.out.println("Choisissez la categorie de reservation :");
-					Categorie.listeDeCategorie(Connexion.con);
-					System.out.print("Categorie: ");
-					i.setIdCategorie(c.nextInt());
+					ArrayList<String> lisIdCat = Categorie.listeDeCategorie(Connexion.con);
+
+					String stIdCat;
+					while (true){
+						System.out.print("Categorie: ");
+						stIdCat = c.next();
+
+						if(lisIdCat.contains(stIdCat)){
+							break;
+						} else {
+							System.out.println(Color.ANSI_RED+" ⚠️ La Categorie Selectionne n'existe pas"+Color.ANSI_RESET);
+						}
+					}
+					i.setIdCategorie(Integer.parseInt(stIdCat));
+
+					int montant = 0;
+					if (i.getIdCategorie()==1){
+						montant = Vol.recupererVolTarif(Connexion.con, i.getIdVol()) + 100;
+					} else if (i.getIdCategorie()==2) {
+						montant = Vol.recupererVolTarif(Connexion.con, i.getIdVol()) + 50;
+					} else {
+						montant = Vol.recupererVolTarif(Connexion.con, i.getIdVol());
+					}
+					montantTotal = montantTotal + montant;
 
 
 					//Nom Passager
 
 					while (true) {
-						System.out.print("nom de Famille : ");
+						System.out.print("Nom de Famille : ");
 						i.setNomPassagerEtranger(c.next());
 						if (NameValidator.isValidName(i.getNomPassagerEtranger())) {
 							break;
@@ -161,8 +191,17 @@ public class Reservation {
 						}
 					}
 
-					System.out.print("Entrer le numero du passe-port : ");
-					i.setNumeroPasseport(c.next());
+					String passeport;
+
+					while (true) {
+						System.out.print("Numero Passeport : ");
+						i.setNumeroPasseport(c.next());
+						if (isValidPassport(i.getNumeroPasseport())) {
+							break;
+						} else {
+							System.out.println(Color.ANSI_RED+"⚠️ Passeport Invalide (9 Caractere alphanumerique)!!!"+Color.ANSI_RESET);
+						}
+					}
 
 
 					try {
@@ -173,49 +212,167 @@ public class Reservation {
 						ps.setString(4, i.getNomPassagerEtranger());
 						ps.setString(5, i.getPrenomPassagerEtranger());
 						ps.setString(6, i.getNumeroPasseport());
+						ps.setString(7, "non paye");
+						ps.setInt(8, montant);
 						ps.execute();
 					} catch (SQLException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
+					listeIdPassager.add(Infopassager.recupererIdInfoPassager(Connexion.con));
 				}
-				System.out.println("Voulez-vous payer ???? : ");
-				String b =c.next();
+				while (true){
+					System.out.println("Voulez-vous payer ???? : ");
+					String b = c.next();
 
-				if(b.equals("oui")) {
-
+					if(b.equalsIgnoreCase("oui") || b.equalsIgnoreCase("o")) {
+						Paiement p = new Paiement();
+						Paiement.ajouterPaiement(montantTotal, i.getIdReservation(), c);
+						for (int count=0; count<listeIdPassager.size();count++){
+							statutPaye(listeIdPassager.get(count));
+						}
+					} else if (b.equalsIgnoreCase("non") || b.equalsIgnoreCase("n")) {
+						break;
+					} else {
+						System.out.println(Color.ANSI_RED+"  Oui ou non !! "+Color.ANSI_RESET);
+					}
 				}
 
 
 			}
 		} else {
-			System.out.println("Aucun vol Disponible !!!!");
+			System.out.println("Aucun vol Disponible !!!!\n");
 		}
 	}
 
 
 
-	public void modifierReservation() {
-		System.out.println("Renseigner le champ à modifier : ");
-		String champString=c.next();
-		System.out.println("Renseigner la modifier à effectuer : ");
-		String val=c.next();
-		System.out.println("Quel l'identifiant du champ à modifier : ");
-		int id=c.nextInt();
-		String sql="UPDATE infopassager SET "+champString+" = ? Where id = ?";
-		Connexion.seConecter();
+	public void modifierReservation(ArrayList<String> lisIdModifiable, boolean annulation) {
+		System.out.println(Color.ANSI_PURPLE+"-------- Modification en cours..\n"+Color.ANSI_RESET);
+		if (!annulation){
+			// Id du Champ a modifier
+			String id;
+			while (true){
+				System.out.print("Choisissez l'identifiant du champ à modifier : ");
+				id = c.next();
 
-		try {
-			PreparedStatement ps=Connexion.con.prepareStatement(sql);
-			ps.setString(1, val);
-			ps.setInt(2, id);
-			ps.execute();
-			System.out.println("Modification reusse !!! : ");
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
+				if (lisIdModifiable.contains(id)){
+					break;
+				} else {
+					System.out.println(Color.ANSI_RED + " ⚠️ L'identifiant entre n'existe pas" + Color.ANSI_RESET);
+				}
+			}
+
+
+			ArrayList<String> listeDesChampsModifiables = new ArrayList<>();
+			listeDesChampsModifiables.add("nom");
+			listeDesChampsModifiables.add("prenom");
+			listeDesChampsModifiables.add("passeport");
+			System.out.println("Voici la liste des champs modifiables: ");
+			System.out.println("[ nom, prenom, passeport ]");
+
+			String champString;
+			while (true) {
+				System.out.print("Renseigner le champ à modifier : ");
+				champString = c.next();
+				if (listeDesChampsModifiables.contains(champString)) {
+					break;
+				} else {
+					System.out.println(Color.ANSI_RED + " ⚠️ Entrer correctement le nom du champ" + Color.ANSI_RESET);
+				}
+
+			}
+
+
+			String val;
+			if (Objects.equals(champString, "nom")){
+				champString = "nomPassagerEtranger";
+				//Nom Passager
+				while (true) {
+					System.out.print("Renseigner la nouvelle valeur : ");
+					val = c.next();
+					if (NameValidator.isValidName(val)) {
+						break;
+					} else {
+						System.out.println(Color.ANSI_RED+"⚠️ Nom Invalide !!!"+Color.ANSI_RESET);
+					}
+				}
+
+			} else if (Objects.equals(champString, "prenom")) {
+				champString = "prenomPassagerEtranger";
+
+				// Prenon
+				while (true) {
+					System.out.print("Renseigner la nouvelle valeur : ");
+					val = c.next();
+					if (NameValidator.isValidName(val)) {
+						break;
+					} else {
+						System.out.println(Color.ANSI_RED+"⚠️ Prenom Invalide !!!"+Color.ANSI_RESET);
+					}
+				}
+			} else {
+				champString = "numeroPasseport";
+
+				// PassePort
+				while (true) {
+					System.out.print("Renseigner la nouvelle valeur : ");
+					val = c.next();
+					if (NameValidator.isValidName(val)) {
+						break;
+					} else {
+						System.out.println(Color.ANSI_RED+"⚠️ Passeport Invalide (Le Passeport est compose de 9 Caracteres) !!!"+Color.ANSI_RESET);
+					}
+				}
+			}
+
+			String sql = "UPDATE infopassager SET " + champString + " = ? Where id = ?";
+
+			try {
+				PreparedStatement ps = Connexion.con.prepareStatement(sql);
+				ps.setString(1, val);
+				ps.setInt(2, Integer.parseInt(id));
+				ps.execute();
+				System.out.println(Color.ANSI_GREEN + "Modification reussie !!!\n"+Color.ANSI_RESET);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} else {
+			// Id du Champ a modifier
+			String id;
+			while (true){
+				System.out.print("Choisissez l'identifiant de la reservation à modifier : ");
+				id = c.next();
+
+				if (lisIdModifiable.contains(id)){
+					break;
+				}
+			}
+
+			String sql = "UPDATE infopassager SET statut = 'annule' Where id = ?";
+
+			try {
+				PreparedStatement ps = Connexion.con.prepareStatement(sql);
+				ps.setInt(1, Integer.parseInt(id));
+				ps.execute();
+				System.out.println("Annulation en cours...");
+				Thread.sleep(1000);
+				System.out.println("Remboursement en cours...");
+				Thread.sleep(2000);
+				System.out.println("Remboursement effectue");
+				Thread.sleep(2000);
+				System.out.println("Annulation Effectue");
+				Thread.sleep(2000);
+				System.out.println(Color.ANSI_GREEN + "Modification reussie !!!\n"+Color.ANSI_RESET);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
 
 	public void supprimerResevation() {
 		System.out.println("Entrez l'identifiant de la ligne à supprimer : ");
@@ -235,6 +392,7 @@ public class Reservation {
 
 
 	}
+
 	private static int recupererIdReservation(Connection connection) throws SQLException {
 		// Préparer la requête SQL
 		String sql = "SELECT idReservation FROM Reservation ORDER BY idReservation DESC LIMIT 1";
@@ -257,5 +415,16 @@ public class Reservation {
 		return idReservation;
 	}
 
+	private static void statutPaye(int id){
+		String sql = "UPDATE infopassager SET statut='paye' WHERE id="+id;
+
+		try {
+			PreparedStatement ps = Connexion.con.prepareStatement(sql);
+			ps.execute();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 
 }

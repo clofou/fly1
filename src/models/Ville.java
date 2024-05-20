@@ -133,7 +133,7 @@ public class Ville {
             while (resultSet.next()) {
 
                 String nomVille = resultSet.getString("nom");
-                listeville.add(nomVille);
+                listeville.add(nomVille.toLowerCase());
                 if(counter>=lastCounterValue+8){
                     System.out.println(" ");
                     lastCounterValue = counter;

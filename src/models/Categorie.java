@@ -6,13 +6,15 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Categorie {
 
 
-    public static void listeDeCategorie(Connection connection) throws SQLException{
-        System.out.print("\n");
+    public static ArrayList<String> listeDeCategorie(Connection connection) throws SQLException{
+        ArrayList<String> listIdCategorie = new ArrayList<String>();
+
         // Create a statement object
         try (Statement statement = connection.createStatement();
              // Create the SQL query to retrieve the entire column list
@@ -22,6 +24,7 @@ public class Categorie {
             while (resultSet.next()) {
                 System.out.print("  ");
                 String idCategorie = resultSet.getString("idCategorie");
+                listIdCategorie.add(idCategorie);
                 String nom = resultSet.getString("nom");
 
                 System.out.print(idCategorie + "- ");
@@ -30,7 +33,8 @@ public class Categorie {
             System.out.println(Color.ANSI_YELLOW+"En Choisissant La categorie 'Buissness' vous payez 100$ de plus que le tarif de base"+Color.ANSI_RESET);
             System.out.println(Color.ANSI_YELLOW+"En Choisissant La categorie 'Affaire' vous payez 50$ de plus"+Color.ANSI_RESET);
         }
-        System.out.println("\n");
+        System.out.println(" ");
+        return listIdCategorie;
     }
 
     public static void ajouteCategorie(Connection connection, Scanner scanner){

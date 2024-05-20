@@ -127,4 +127,44 @@ public class util {
         }
         return true;
     }
+    public static String ajoutEspace(String s){
+        StringBuilder sBuilder = new StringBuilder(s);
+        if (sBuilder.length() > 8){
+            return sBuilder.substring(0, 7) + "..";
+        }
+        while (sBuilder.length() <= 8){
+            sBuilder.append(" ");
+        }
+
+        s = sBuilder.toString();
+        return s;
+    }
+
+    public static boolean isValidPassport(String passportNumber) {
+        final Pattern PASSPORT_PATTERN = Pattern.compile("^[a-zA-Z0-9]{9}$");
+        if (passportNumber == null) {
+            return false;
+        }
+        return PASSPORT_PATTERN.matcher(passportNumber).matches();
+    }
+
+    public static boolean hasFourteenOrAnyDigits(String input, int number) {
+        if (input == null) {
+            return false;
+        }
+
+        // Vérifier que la chaîne a exactement 14 caractères
+        if (input.length() != number) {
+            return false;
+        }
+
+        // Vérifier que tous les caractères sont des chiffres
+        for (int i = 0; i < input.length(); i++) {
+            if (!Character.isDigit(input.charAt(i))) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }

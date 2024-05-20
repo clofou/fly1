@@ -120,7 +120,7 @@ public class Passager extends Personne {
     //Methode modifierReservation
 
     public void annulerReservation(int idReservation) throws SQLException {
-        String modificationQuery = "UPDATE Reservation SET status = ? WHERE idReservation = ? AND idPassager = ?";
+        String modificationQuery = "UPDATE Reservation SET statut = ? WHERE idReservation = ? AND idPassager = ?";
 
         try (
              PreparedStatement statement = Connexion.con.prepareStatement(modificationQuery)) {
