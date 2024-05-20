@@ -1,13 +1,18 @@
 package models;
 
+import com.sun.xml.internal.bind.v2.runtime.output.StAXExStreamWriterOutput;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Scanner;
 
 public class Pays {
+
     public static void ajouterPays(Connection connection, Scanner scanner) {
         System.out.println("Ajout d'un pays : ");
 
@@ -76,7 +81,7 @@ public class Pays {
         }
     }
 
-    public static void listeDePays(Connection connection) throws SQLException{
+    public static void listeDePays(Connection connection) throws SQLException {
         System.out.println("\n");
         // Create a statement object
         try (Statement statement = connection.createStatement();
@@ -93,5 +98,21 @@ public class Pays {
             }
         }
         System.out.println("\n\n");
+    }
+
+    public static void afficherTousLesIds(Connection connection) {
+        System.out.println("Liste des IDs des pays :");
+        String sql = "SELECT idPays FROM pays";
+        try (Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(sql)) {
+            ArrayList<Integer> listeIds = new ArrayList<>();
+            while (resultSet.next()) {
+                int id = resultSet.getInt("idPays");
+                listeIds.add(id);
+            }
+            System.out.println(listeIds);
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
     }
 }

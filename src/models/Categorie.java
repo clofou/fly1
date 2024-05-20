@@ -4,13 +4,15 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Categorie {
 
 
-    public static void listeDeCategorie(Connection connection) throws SQLException{
-        System.out.print("\n");
+    public static ArrayList<String> listeDeCategorie(Connection connection) throws SQLException{
+        ArrayList<String> listIdCategorie = new ArrayList<String>();
+
         // Create a statement object
         try (Statement statement = connection.createStatement();
              // Create the SQL query to retrieve the entire column list
@@ -20,13 +22,15 @@ public class Categorie {
             while (resultSet.next()) {
                 System.out.print("  ");
                 String idCategorie = resultSet.getString("idCategorie");
+                listIdCategorie.add(idCategorie);
                 String nom = resultSet.getString("nom");
 
                 System.out.print(idCategorie + "- ");
                 System.out.println(nom);
             }
         }
-        System.out.println("\n");
+        System.out.println(" ");
+        return listIdCategorie;
     }
 
     public static void ajouteCategorie(Connection connection, Scanner scanner){
@@ -35,26 +39,9 @@ public class Categorie {
         System.out.println("Nom categorie : ");
         String nom = scanner.nextLine();
 
-        
-
-       
-        // int vol_id  = 0;
-        // boolean isInt = false;
-        // do {
-        //     System.out.println("Vol id : ");
-        //     if (scanner.hasNextInt()) {
-        //         vol_id = scanner.nextInt();
-        //         isInt = true;
-        //     } else {
-        //         System.out.println("Veuillez saisir un entier.");
-        //         scanner.next(); // Pour vider le scanner et éviter une boucle infinie
-        //     }
-        // } while (!isInt);
-
         String sql = "INSERT INTO categorie (nom) VALUES (?)";
         try (PreparedStatement statement = connection.prepareStatement(sql)){
             statement.setString(1,nom);
-            // statement.setInt(2,vol_id);
 
             int lignesModifiees = statement.executeUpdate();
             if (lignesModifiees > 0) {

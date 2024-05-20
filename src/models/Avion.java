@@ -70,7 +70,7 @@ public class Avion {
 			a.setIdCompagnie(c.nextInt());
 		}
 
-		String sql="INSERT INTO Avion VALUES(?,?,?,?)";
+		String sql="INSERT INTO avion VALUES(?,?,?,?)";
 		Connexion.seConecter();
 		try {
 			PreparedStatement ps=Connexion.con.prepareStatement(sql);
@@ -95,7 +95,7 @@ public class Avion {
 		System.out.println("Donnee l'immatriculation du champt a modifier :");
 		String immatriculation = c.next();
 
-		String sql = "UPDATE Avion SET "+val+" = ? WHERE immatriculation = ?";
+		String sql = "UPDATE avion SET "+val+" = ? WHERE immatriculation = ?";
 		Connexion.seConecter();
 		try {
 			PreparedStatement p = Connexion.con.prepareStatement(sql);
@@ -114,7 +114,7 @@ public class Avion {
 		String immatriculation = c.next();
 
 		Connexion.seConecter();
-		String sql = "DELETE FROM Avion WHERE immatriculation = ?";
+		String sql = "DELETE FROM avion WHERE immatriculation = ?";
 		try {
 			PreparedStatement p = Connexion.con.prepareStatement(sql);
 			p.setString(1, immatriculation);
@@ -197,4 +197,5 @@ public class Avion {
         }
 		System.out.println("\n\n");
     }
+
 }
