@@ -1,8 +1,7 @@
 import models.*;
 import org.mindrot.jbcrypt.BCrypt;
-import utils.Color;
+import utils.*;
 import utils.Date;
-import utils.NameValidator;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -24,22 +23,35 @@ public class Main {
 //----------------------------------------------------------------------------
 
         // Le Passager Vient sur L'appli, 3 choix s'offre a lui
+        int idP = FileOperations.readIntegerFromFile("session.txt");
+        boolean isConnect = (idP == -1) ? false: true;
+        boolean successConnect = false;
+        boolean isSessionExpired = DateTimeOperations.is15MinutesElapsed(DateTimeOperations.readSavedDateTime());
+
         while (true){
             String choice = "";
-            while (true){
-                System.out.println(Color.ANSI_BLUE +"--- Choisissez Une Option ---" + Color.ANSI_RESET);
-                System.out.println("1- S'inscrire");
-                System.out.println("2- Se Connecter");
-                System.out.println("0- Quitter L'application ⚠️ !!!");
-                choice = scanner.next();
-                if(Objects.equals(choice, "1") || Objects.equals(choice, "2")){
-                    break;
-                } else if (choice.equals("0")) {
-                    System.exit(0);
-                } else {
-                    System.out.println(Color.ANSI_RED+"⚠️ Choix Invalide!!!"+Color.ANSI_RESET);
+            if(isConnect && !isSessionExpired){
+                choice = "2";
+                successConnect = true;
+            }
+            else{
+
+                while (true){
+                    System.out.println(Color.ANSI_BLUE +"--- Choisissez Une Option ---" + Color.ANSI_RESET);
+                    System.out.println("1- S'inscrire");
+                    System.out.println("2- Se Connecter");
+                    System.out.println("0- Quitter L'application ⚠️ !!!");
+                    choice = scanner.next();
+                    if(Objects.equals(choice, "1") || Objects.equals(choice, "2")){
+                        break;
+                    } else if (choice.equals("0")) {
+                        System.exit(0);
+                    } else {
+                        System.out.println(Color.ANSI_RED+"⚠️ Choix Invalide!!!"+Color.ANSI_RESET);
+                    }
                 }
             }
+
 
             // Si l'utilisateur choisit Le choix 1, il s'inscrit
             if (choice.equals("1")) {
@@ -51,11 +63,23 @@ public class Main {
             // Ici On a le cas ou l'utilisation se connecte
             if(choice.equals("2")){
                 String callback = "1203";
-                System.out.println(Color.ANSI_BLUE + "\n-------------Page de Connexion------------" + Color.ANSI_RESET);
+
+
                 // Ici L'utilisateur Essaie De se Connecter si il echoue, il reprend
                 label:
                 while (true){
-                    int idPassager = ConnexionPassager();
+                    int idPassager = successConnect ? idP : ConnexionPassager();
+                    // Sauvegarde de la session de l'utilisateur
+                    FileOperations.writeIntegerToFile("session.txt", idPassager);
+                    DateTimeOperations.saveCurrentDateTime();
+
+                    if(!successConnect){
+                        System.out.println(Color.ANSI_BLUE + "\n-------------Page de Connexion------------" + Color.ANSI_RESET);
+
+                    } else {
+                        Passager.BienvenuePassagerById(Connexion.con, idPassager);
+                    }
+
                     if(idPassager != -1){
 
                         // --------------MAIN--------------------------
@@ -83,6 +107,7 @@ public class Main {
                             }
                             switch (choice1) {
                                 case "0":
+                                    FileOperations.writeIntegerToFile("session.txt", -1);
                                     break label;
 
 
