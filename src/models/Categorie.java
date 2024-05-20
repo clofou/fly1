@@ -1,4 +1,6 @@
 package models;
+import utils.Color;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -25,6 +27,8 @@ public class Categorie {
                 System.out.print(idCategorie + "- ");
                 System.out.println(nom);
             }
+            System.out.println(Color.ANSI_YELLOW+"En Choisissant La categorie 'Buissness' vous payez 100$ de plus que le tarif de base"+Color.ANSI_RESET);
+            System.out.println(Color.ANSI_YELLOW+"En Choisissant La categorie 'Affaire' vous payez 50$ de plus"+Color.ANSI_RESET);
         }
         System.out.println("\n");
     }

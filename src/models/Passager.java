@@ -233,7 +233,7 @@ public class Passager extends Personne {
                 String nom = resultSet.getString("nom");
                 String prenom = resultSet.getString("prenom");
 
-                System.out.println("\nBIENBENUE,"+ Color.ANSI_GREEN + prenom.toUpperCase() + " " + nom.toUpperCase()+ Color.ANSI_RESET+"\n");
+                System.out.println("\nBIENVENUE,"+ Color.ANSI_GREEN + prenom.toUpperCase() + " " + nom.toUpperCase()+ Color.ANSI_RESET+"\n");
             }
         }
     }
