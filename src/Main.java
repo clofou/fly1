@@ -13,7 +13,7 @@ import static utils.Date.lireDateValide;
 
 public class Main {
     public static void main(String[] args) throws SQLException {
-        /* Chargement des fonctions Necessaire pour Executer le script,
+        /* Chargement des fonctions Necessaires pour Executer le script,
         le scanner et la connexion a la base
          */
         Scanner scanner = new Scanner(System.in);
