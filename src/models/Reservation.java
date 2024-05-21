@@ -9,6 +9,7 @@ import models.Connexion;
 import utils.Color;
 import utils.NameValidator;
 
+import static models.util.estEntier;
 import static models.util.isValidPassport;
 import static utils.Date.lireDateValide;
 
@@ -80,28 +81,16 @@ public class Reservation {
 				System.out.println(Color.ANSI_RED+"La Ville que vous avez entrer ne figure pas dans la liste des villes enregistree\n"+Color.ANSI_RESET);
 			}
 		}
-		System.out.print("Choisissez la date ");
-		r.setDate_reservation(new utils.Date(lireDateValide()).formatAnglais());
-
-		System.out.print("Vous voulez reserver pour combien de place ? ");
-		while(true) {
-			if(c.hasNextInt()) {
-				r.setNbre_de_passager(c.nextInt());
-				if(r.getNbre_de_passager() >= 1 && r.getNbre_de_passager() <= 9){
-					break;
-				}
-			}
-			else {
-				System.out.println(Color.ANSI_RED+" ⚠️ Entrer un entier Compris entre 1 et 9 : "+Color.ANSI_RESET);
-                c.next();
-			}
-		}
-		int a=r.getNbre_de_passager();
-
-
 		// Affiche La liste des Vols Correspondants
-		ArrayList<String> listIdVol = Vol.volDispoAUneDate(Connexion.con, r.getDate_reservation(),a,villeDepa, villeDArrive);
+		System.out.println(Color.ANSI_PURPLE+"------ Liste des vols"+Color.ANSI_RESET);
+		ArrayList<String> listIdVol = Vol.volDispoAUneDate(Connexion.con,villeDepa, villeDArrive);
 		boolean isVolDispo = !listIdVol.isEmpty();
+
+		System.out.println(Color.ANSI_YELLOW+"⚠️ Verifiez bien les dates de depart "+Color.ANSI_RESET);
+
+
+
+
 
         if (isVolDispo){
 			Infopassager i=new Infopassager();
@@ -117,6 +106,33 @@ public class Reservation {
 				}
 			}
 			i.setIdVol(Integer.parseInt(stIdVol));
+			r.setDate_reservation(Vol.recupererDateWithIdVol(Connexion.con, i.getIdVol()));
+
+
+
+			while(true) {
+				System.out.print("Vous voulez reserver pour combien de place ? ");
+				String nbr = c.next();
+				if(estEntier(nbr)) {
+					r.setNbre_de_passager(Integer.parseInt(nbr));
+					if(r.getNbre_de_passager() >= 1 && r.getNbre_de_passager() <= 9){
+						if (r.getNbre_de_passager() <= Vol.placeDisponible(Connexion.con, Vol.recupererImmWithIdVol(Connexion.con,i.getIdVol()), i.getIdVol())){
+							break;
+						} else {
+							System.out.println(Color.ANSI_RED+" ⚠️ Pas assez de place disponible : "+Color.ANSI_RESET);
+						}
+					}
+					else {
+						System.out.println(Color.ANSI_RED+" ⚠️ Entrer un entier Compris entre 1 et 9 : "+Color.ANSI_RESET);
+					}
+				}
+				else {
+					System.out.println(Color.ANSI_RED+" ⚠️ Entrer un entier Compris entre 1 et 9 : "+Color.ANSI_RESET);
+					c.next();
+				}
+			}
+			int a=r.getNbre_de_passager();
+
 
 
 			if(a>0) {
@@ -131,8 +147,8 @@ public class Reservation {
 					e.printStackTrace();
 
 				}
-				String rq="INSERT INTO infopassager(idReservation,idVol,idCategorie,nomPassagerEtranger,prenomPassagerEtranger,numeroPasseport, statut, tarif) "
-						+ "values(?,?,?,?,?,?,?,?)";
+				String rq="INSERT INTO infopassager(idReservation,idVol,idCategorie,nomPassagerEtranger,prenomPassagerEtranger,numeroPasseport, statut, tarif, numeroDePlace) "
+						+ "values(?,?,?,?,?,?,?,?,?)";
 				for(int j=1;j<= a;j++) {
 
 					System.out.println(Color.ANSI_PURPLE+"			Enregistrer la personne "+j +"\n"+Color.ANSI_RESET);
@@ -203,6 +219,43 @@ public class Reservation {
 						}
 					}
 
+					System.out.println(" ");
+					String numPlace = "";
+					String imm = Vol.recupererImmWithIdVol(Connexion.con,i.getIdVol());
+					int capaciteAvion = Avion.recupererCapaciteAvion(Connexion.con, imm);
+					int alaLigne = 0;
+					ArrayList<Integer> listePlaceOccupe = Vol.listeDesPlacesOccuperPourUnVol(Connexion.con, i.getIdVol());
+
+					// Affichage de la liste des places dispo
+					for (int v=1; v<=capaciteAvion; v++){
+						if(listePlaceOccupe.contains(v)){
+							System.out.print(Color.ANSI_BLUE+v+"  "+Color.ANSI_RESET);
+						} else {
+							System.out.print(v+ "  ");
+						}
+						if(v >= alaLigne+8){
+							System.out.println("  ");
+							alaLigne = alaLigne+8;
+						}
+					}
+					System.out.println("\n\n");
+
+					while (true){
+						System.out.print("Choisissez Vôtre numero de place: ");
+						numPlace = c.next();
+						if(estEntier(numPlace)){
+							if (Integer.parseInt(numPlace) <= 0 || Integer.parseInt(numPlace) > capaciteAvion) {
+								System.out.println(Color.ANSI_RED+"⚠️ La Place n'existe pas"+Color.ANSI_RESET);
+							} else if (!listePlaceOccupe.contains(Integer.parseInt(numPlace))){
+								break;
+							} else {
+								System.out.println(Color.ANSI_RED+"⚠️ La Place est deja prise"+Color.ANSI_RESET);
+							}
+						} else {
+							System.out.println(Color.ANSI_RED+"⚠️ Entrer un entier"+Color.ANSI_RESET);
+						}
+					}
+
 
 					try {
 						PreparedStatement ps=Connexion.con.prepareStatement(rq);
@@ -214,6 +267,7 @@ public class Reservation {
 						ps.setString(6, i.getNumeroPasseport());
 						ps.setString(7, "non paye");
 						ps.setInt(8, montant);
+						ps.setInt(9,Integer.parseInt(numPlace));
 						ps.execute();
 					} catch (SQLException e) {
 						// TODO Auto-generated catch block
@@ -221,24 +275,24 @@ public class Reservation {
 					}
 					listeIdPassager.add(Infopassager.recupererIdInfoPassager(Connexion.con));
 				}
-				while (true){
-					System.out.println("Voulez-vous payer ???? : ");
-					String b = c.next();
 
-					if(b.equalsIgnoreCase("oui") || b.equalsIgnoreCase("o")) {
-						Paiement p = new Paiement();
-						Paiement.ajouterPaiement(montantTotal, i.getIdReservation(), c);
-						for (int count=0; count<listeIdPassager.size();count++){
-							statutPaye(listeIdPassager.get(count));
-						}
-					} else if (b.equalsIgnoreCase("non") || b.equalsIgnoreCase("n")) {
-						break;
-					} else {
-						System.out.println(Color.ANSI_RED+"  Oui ou non !! "+Color.ANSI_RESET);
+			}
+			while (true){
+				System.out.println("Voulez-vous payer ???? : ");
+				String b = c.next();
+
+				if(b.equalsIgnoreCase("oui") || b.equalsIgnoreCase("o")) {
+					Paiement p = new Paiement();
+					Paiement.ajouterPaiement(montantTotal, i.getIdReservation(), c);
+					for (int count=0; count<listeIdPassager.size();count++){
+						statutPaye(listeIdPassager.get(count));
 					}
+					break;
+				} else if (b.equalsIgnoreCase("non") || b.equalsIgnoreCase("n")) {
+					break;
+				} else {
+					System.out.println(Color.ANSI_RED+"  Oui ou non !! "+Color.ANSI_RESET);
 				}
-
-
 			}
 		} else {
 			System.out.println("Aucun vol Disponible !!!!\n");
@@ -375,6 +429,7 @@ public class Reservation {
     }
 
 	public void supprimerResevation() {
+
 		System.out.println("Entrez l'identifiant de la ligne à supprimer : ");
 		int id=c.nextInt();
 		String sq="DELETE  FROM infopassager where id=?";
@@ -394,6 +449,7 @@ public class Reservation {
 	}
 
 	private static int recupererIdReservation(Connection connection) throws SQLException {
+		
 		// Préparer la requête SQL
 		String sql = "SELECT idReservation FROM Reservation ORDER BY idReservation DESC LIMIT 1";
 		int idReservation = 0;
@@ -416,7 +472,9 @@ public class Reservation {
 	}
 
 	private static void statutPaye(int id){
+
 		String sql = "UPDATE infopassager SET statut='paye' WHERE id="+id;
+
 
 		try {
 			PreparedStatement ps = Connexion.con.prepareStatement(sql);

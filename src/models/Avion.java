@@ -43,7 +43,7 @@ public class Avion {
 		a.AjouterAvions();
 	}
 
-	private static int recupererCapaciteAvion(Connection connection, String idAvion) throws SQLException{
+	public static int recupererCapaciteAvion(Connection connection, String idAvion) throws SQLException{
 		// Préparer la requête SQL
         String sql = "SELECT capacite FROM Avion WHERE immatriculation='"+idAvion+"'";
 		int capacit = 0;
@@ -54,7 +54,6 @@ public class Avion {
             if (resultSet.next()) {
                 // Récupérer la valeur unique
                 capacit = resultSet.getInt("capacite");
-                System.out.println("Capacite : " + capacit);
 
                 // Utiliser la valeur récupérée
                 // ... votre code ici pour utiliser la valeur 'nomUtilisateur'
@@ -64,6 +63,8 @@ public class Avion {
         }
 		return capacit;
 	}
+
+
 
 	public static int updateAvionCapacite(Connection connection, int nombreDePlace, String idAvion){
 		int nouvelleCapacite = -1;

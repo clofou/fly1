@@ -167,4 +167,17 @@ public class util {
 
         return true;
     }
+
+    public static boolean estEntier(String chaine) {
+        if (chaine == null || chaine.isEmpty()) {
+            return false;
+        }
+
+        try {
+            Integer.parseInt(chaine);
+        } catch (NumberFormatException e) {
+            return false;
+        }
+        return true;
+    }
 }

@@ -92,7 +92,23 @@ public class Vol {
         this.tarif = tarif;
     }
 
-    public static ArrayList<String> volDispoAUneDate(Connection connection, String date, int nbreDePlace, String villeDeDepar, String villeDArriv) throws SQLException{
+    public static int placeDisponible(Connection connection, String idAvion, int idVol) throws SQLException {
+        int placeDispo = 0;
+
+        try(Statement statement1 = connection.createStatement();
+            // Create the SQL query to retrieve the entire column list
+            ResultSet resultSet1 = statement1.executeQuery("SELECT Count(*) i FROM InfoPassager WHERE idVol="+idVol)){
+
+            // Iterate through the result set and print each value
+            while (resultSet1.next()){
+                placeDispo=(Avion.recupererCapaciteAvion(Connexion.con, idAvion)-resultSet1.getInt("i"));
+            }
+
+        }
+        return (placeDispo<=0)?0:placeDispo;
+    }
+
+    public static ArrayList<String> volDispoAUneDate(Connection connection, String villeDeDepar, String villeDArriv) throws SQLException{
         
 
 
@@ -101,7 +117,7 @@ public class Vol {
 
         try (Statement statement = connection.createStatement();
              // Create the SQL query to retrieve the entire column list
-             ResultSet resultSet = statement.executeQuery("SELECT idVol, villeDeDepart, villeDArrive, dateDeDepart, nombreDEscale, modele, tarif, capacite, immatriculation FROM Vol NATURAL JOIN Avion WHERE dateDeDepart='"+date+"'AND villeDeDepart='"+villeDeDepar+"' AND villeDArrive='"+villeDArriv+"'")) {
+             ResultSet resultSet = statement.executeQuery("SELECT idVol, villeDeDepart, villeDArrive, dateDeDepart, nombreDEscale, modele, tarif, capacite, immatriculation, nomCompagnie FROM Vol NATURAL JOIN Avion NATURAL JOIN compagnie WHERE villeDeDepart='"+villeDeDepar+"' AND villeDArrive='"+villeDArriv+"'")) {
 
             // Iterate through the result set and print each value
             while (resultSet.next()) {
@@ -110,31 +126,23 @@ public class Vol {
 
                 String villeDeDepart = resultSet.getString("villeDeDepart");
                 String villeDArrive = resultSet.getString("villeDArrive");
+                String nomCompagnie = resultSet.getString("nomCompagnie");
                 String dateDeDepart = resultSet.getString("dateDeDepart");
                 int nombreDEscale = resultSet.getInt("nombreDEscale");
                 int tarif = resultSet.getInt("tarif");
                 String immatriculation = resultSet.getString("immatriculation");
-                int placeDispo = 0;
+                int placeDispo = placeDisponible(Connexion.con, immatriculation, Integer.parseInt(idVol));
 
-                try(Statement statement1 = connection.createStatement();
-                    // Create the SQL query to retrieve the entire column list
-                    ResultSet resultSet1 = statement1.executeQuery("SELECT Count(*) i FROM InfoPassager WHERE idVol="+idVol)){
-
-                    // Iterate through the result set and print each value
-                    while (resultSet1.next()){
-                        placeDispo=(resultSet.getInt("capacite")-resultSet1.getInt("i"));
-                    }
-
-                }
                 
                 System.out.print("	");
                 System.out.print("numeroVol: "+idVol + "  ");
+                System.out.print(dateDeDepart + " ");
                 System.out.print("immatriculationAvion: "+immatriculation + "  ");
+                System.out.print("Compagnie: "+nomCompagnie + "  ");
                 System.out.print(villeDeDepart + "-");
                 System.out.print(villeDArrive + "  ");
-                System.out.print(dateDeDepart + " ");
                 System.out.print("nombreEscale:"+nombreDEscale + " ");
-                System.out.print("tarif:"+tarif+"cfa  ");
+                System.out.print("tarif:"+tarif+"$  ");
                 System.out.println(placeDispo+" places disponible");
 
             }
@@ -421,6 +429,71 @@ public class Vol {
             }
         }
         return mont;
+    }
+
+    public static ArrayList<Integer> listeDesPlacesOccuperPourUnVol(Connection connection, int idVol){
+        ArrayList<Integer> liste = new ArrayList<>();
+        // Préparer la requête SQL
+        String sql = "SELECT numeroDePlace FROM infopassager WHERE idVol="+idVol;
+        int numeroDePlace = 0;
+        try (Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(sql)) {
+
+            // Vérifier si le ResultSet contient des données
+            while (resultSet.next()) {
+                // Récupérer la valeur unique
+                numeroDePlace = resultSet.getInt("numeroDePlace");
+                liste.add(numeroDePlace);
+
+                // Utiliser la valeur récupérée
+                // ... votre code ici pour utiliser la valeur 'nomUtilisateur'
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return liste;
+    }
+
+    public static String recupererImmWithIdVol(Connection connection, int idVol) throws SQLException{
+        // Préparer la requête SQL
+        String sql = "SELECT immatriculation FROM Vol WHERE idVol="+idVol;
+        String immatriculation = "";
+        try (Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(sql)) {
+
+            // Vérifier si le ResultSet contient des données
+            if (resultSet.next()) {
+                // Récupérer la valeur unique
+                immatriculation = resultSet.getString("immatriculation");
+
+                // Utiliser la valeur récupérée
+                // ... votre code ici pour utiliser la valeur 'nomUtilisateur'
+            } else {
+                System.out.println("Aucune donnée trouvée.");
+            }
+        }
+        return immatriculation;
+    }
+
+    public static String recupererDateWithIdVol(Connection connection, int idVol) throws SQLException{
+        // Préparer la requête SQL
+        String sql = "SELECT dateDeDepart FROM Vol WHERE idVol="+idVol;
+        String dateDeDepart = "";
+        try (Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(sql)) {
+
+            // Vérifier si le ResultSet contient des données
+            if (resultSet.next()) {
+                // Récupérer la valeur unique
+                dateDeDepart = resultSet.getString("dateDeDepart");
+
+                // Utiliser la valeur récupérée
+                // ... votre code ici pour utiliser la valeur 'nomUtilisateur'
+            } else {
+                System.out.println("Aucune donnée trouvée.");
+            }
+        }
+        return dateDeDepart;
     }
 
 }
