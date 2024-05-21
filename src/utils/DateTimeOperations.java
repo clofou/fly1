@@ -13,9 +13,9 @@ public class DateTimeOperations {
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_NAME))) {
             writer.write(currentDateTime.format(FORMATTER));
-            System.out.println("Successfully saved current date and time: " + currentDateTime);
+            //System.out.println("Successfully saved current date and time: " + currentDateTime);
         } catch (IOException e) {
-            System.err.println("An error occurred while writing to the file: " + e.getMessage());
+            //System.err.println("An error occurred while writing to the file: " + e.getMessage());
         }
     }
 
@@ -26,13 +26,13 @@ public class DateTimeOperations {
             String dateTimeString = reader.readLine();
             if (dateTimeString != null) {
                 savedDateTime = LocalDateTime.parse(dateTimeString, FORMATTER);
-                System.out.println("Successfully read saved date and time: " + savedDateTime);
+                //System.out.println("Successfully read saved date and time: " + savedDateTime);
             } else {
-                System.err.println("The file is empty.");
+                //System.err.println("The file is empty.");
                 return LocalDateTime.now();
             }
         } catch (IOException e) {
-            System.err.println("An error occurred while reading from the file: " + e.getMessage());
+            //System.err.println("An error occurred while reading from the file: " + e.getMessage());
         }
 
         return savedDateTime;
@@ -53,7 +53,7 @@ public class DateTimeOperations {
         // Vérifier si 15 minutes se sont écoulées
         if (savedDateTime != null) {
             boolean elapsed = is15MinutesElapsed(savedDateTime);
-            System.out.println("Has 15 minutes elapsed since saved time? " + elapsed);
+            //System.out.println("Has 15 minutes elapsed since saved time? " + elapsed);
         }
     }
 }

@@ -23,12 +23,15 @@ public class Main {
 //----------------------------------------------------------------------------
 
         // Le Passager Vient sur L'appli, 3 choix s'offre a lui
-        int idP = FileOperations.readIntegerFromFile("session.txt");
-        boolean isConnect = (idP == -1) ? false: true;
-        boolean successConnect = false;
-        boolean isSessionExpired = DateTimeOperations.is15MinutesElapsed(DateTimeOperations.readSavedDateTime());
 
+
+        debut:
         while (true){
+            int idP = FileOperations.readIntegerFromFile("session.txt");
+            boolean isConnect = idP != -1;
+            boolean successConnect = false;
+            boolean isSessionExpired = DateTimeOperations.is15MinutesElapsed(DateTimeOperations.readSavedDateTime());
+
             String choice = "";
             if(isConnect && !isSessionExpired){
                 choice = "2";
@@ -68,17 +71,18 @@ public class Main {
                 // Ici L'utilisateur Essaie De se Connecter si il echoue, il reprend
                 label:
                 while (true){
+                    if(!successConnect){
+                        System.out.println(Color.ANSI_BLUE + "\n-------------Page de Connexion------------" + Color.ANSI_RESET);
+                    }
                     int idPassager = successConnect ? idP : ConnexionPassager();
                     // Sauvegarde de la session de l'utilisateur
                     FileOperations.writeIntegerToFile("session.txt", idPassager);
                     DateTimeOperations.saveCurrentDateTime();
 
-                    if(!successConnect){
-                        System.out.println(Color.ANSI_BLUE + "\n-------------Page de Connexion------------" + Color.ANSI_RESET);
-
-                    } else {
+                    if(successConnect){
                         Passager.BienvenuePassagerById(Connexion.con, idPassager);
                     }
+
 
                     if(idPassager != -1){
 
@@ -100,17 +104,13 @@ public class Main {
                                 if(Objects.equals(choice1, "1") || Objects.equals(choice1, "2")){
                                     break;
                                 } else if (choice1.equals("0")) {
-                                    break;
+                                    FileOperations.writeIntegerToFile("session.txt", -1);
+                                    continue debut;
                                 } else {
                                     System.out.println(Color.ANSI_RED+"⚠️ Choix Invalide!!!"+Color.ANSI_RESET);
                                 }
                             }
                             switch (choice1) {
-                                case "0":
-                                    FileOperations.writeIntegerToFile("session.txt", -1);
-                                    break label;
-
-
                                 // En fonction des choix effectuer Le Workflow Correspondant
                                 case "1":
                                     Reservation r = new Reservation();
