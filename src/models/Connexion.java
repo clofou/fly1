@@ -1,5 +1,6 @@
 package models;
 
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -14,7 +15,7 @@ public class Connexion {
 			String url="jdbc:mysql://localhost:3306/gestiondevolgroupe1";
 			String user="root";
 			String pass="";
-			con=DriverManager.getConnection(url,user,pass);
+			con= DriverManager.getConnection(url,user,pass);
 			System.out.println("Connection reussit ");
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block

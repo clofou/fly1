@@ -283,7 +283,7 @@ public class Main {
         ArrayList<String> liste = new ArrayList<>();
         if (IdPassager != -1) {
             String listeReservationIdPersonne = "SELECT r.idReservation, r.dateReservation, r.nombreDePassager, i.statut, i.id, " +
-                    "i.nomPassagerEtranger, i.prenomPassagerEtranger, i.numeroPasseport,i.idVol, v.idVol, v.immatriculation, " +
+                    "i.nomPassagerEtranger, i.prenomPassagerEtranger, i.numeroPasseport,i.idVol,i.numeroDePlace, v.idVol, v.immatriculation, " +
                     "v.villeDeDepart, v.villeDArrive, v.dateDeDepart, v.dateDArrive, v.nombreDEscale, i.tarif, " +
                     "c.idCategorie, c.nom AS nomCategorie FROM reservation r NATURAL JOIN infopassager i NATURAL JOIN " +
                     "categorie c JOIN vol v on v.idVol=i.idVol WHERE r.idPassager ="+ IdPassager;
@@ -294,9 +294,10 @@ public class Main {
             System.out.print("      idReservation");
             System.out.print("      dateReservation");
             System.out.print("      Statut");
-            System.out.print("      nomPassagerEtranger");
-            System.out.print("      prenomPassagerEtranger");
+            System.out.print("          nomPassager");
+            System.out.print("          prenomPassager");
             System.out.print("      numeroPasseport");
+            System.out.print("      numeroDePlace");
             System.out.print("      immatriculation Avion");
             System.out.print("      villeDeDepart");
             System.out.print("      villeDArrive");
@@ -327,6 +328,7 @@ public class Main {
                         String villeDeDepart = resultSet.getString("v.villeDeDepart");
                         String villeDArrive = resultSet.getString("v.villeDArrive");
                         String dateDeDepart = resultSet.getString("v.dateDeDepart");
+                        int numeroDePlace = resultSet.getInt("i.numeroDePlace");
                         int nombreDEscale = resultSet.getInt("v.nombreDEscale");
                         int tarif = resultSet.getInt("i.tarif");
                         String nomCategorie = resultSet.getString("nomCategorie");
@@ -335,17 +337,18 @@ public class Main {
                         System.out.print(ajoutEspace(String.valueOf(id)));
                         System.out.print("     "+ajoutEspace(String.valueOf(idReservation)));
                         System.out.print("      "+dateReservation);
-                        System.out.print(Color.ANSI_CYAN+"          "+ajoutEspace(statut)+Color.ANSI_RESET);
+                        System.out.print(Color.ANSI_CYAN+"         "+ajoutEspace(statut)+Color.ANSI_RESET);
                         System.out.print("         "+ajoutEspace(nomPassagerEtranger));
-                        System.out.print("               "+ajoutEspace(prenomPassagerEtranger));
-                        System.out.print("                  "+ajoutEspace(numeroPasseport));
+                        System.out.print("            "+ajoutEspace(prenomPassagerEtranger));
+                        System.out.print("         "+ajoutEspace(numeroPasseport));
+                        System.out.print("            "+ajoutEspace(String.valueOf(numeroDePlace)));
                         System.out.print("             "+ajoutEspace(immatriculation));
-                        System.out.print("                  "+ajoutEspace(villeDeDepart));
-                        System.out.print("         "+ajoutEspace(villeDArrive));
+                        System.out.print("                "+ajoutEspace(villeDeDepart));
+                        System.out.print("            "+ajoutEspace(villeDArrive));
                         System.out.print("       "+dateDeDepart);
                         System.out.print("             "+nombreDEscale);
                         System.out.print("             "+tarif);
-                        System.out.println("       "+ajoutEspace(nomCategorie));
+                        System.out.println("         "+ajoutEspace(nomCategorie));
                     }
 
                 }
