@@ -18,6 +18,7 @@ public class Main {
          */
         Scanner scanner = new Scanner(System.in);
         Connexion.seConecter();
+        System.out.println(" ");
 
 
 //----------------------------------------------------------------------------
