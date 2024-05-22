@@ -1,8 +1,7 @@
 import models.*;
 import org.mindrot.jbcrypt.BCrypt;
-import utils.Color;
+import utils.*;
 import utils.Date;
-import utils.NameValidator;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -14,32 +13,49 @@ import static utils.Date.lireDateValide;
 
 public class Main {
     public static void main(String[] args) throws SQLException {
-        /* Chargement des fonctions Necessaire pour Executer le script,
+        /* Chargement des fonctions Necessaires pour Executer le script,
         le scanner et la connexion a la base
          */
         Scanner scanner = new Scanner(System.in);
         Connexion.seConecter();
+        System.out.println(" ");
 
 
 //----------------------------------------------------------------------------
 
         // Le Passager Vient sur L'appli, 3 choix s'offre a lui
+
+
+        debut:
         while (true){
+            int idP = FileOperations.readIntegerFromFile("session.txt");
+            boolean isConnect = idP != -1;
+            boolean successConnect = false;
+            boolean isSessionExpired = DateTimeOperations.is15MinutesElapsed(DateTimeOperations.readSavedDateTime());
+
             String choice = "";
-            while (true){
-                System.out.println(Color.ANSI_BLUE +"--- Choisissez Une Option ---" + Color.ANSI_RESET);
-                System.out.println("1- S'inscrire");
-                System.out.println("2- Se Connecter");
-                System.out.println("0- Quitter L'application ⚠️ !!!");
-                choice = scanner.next();
-                if(Objects.equals(choice, "1") || Objects.equals(choice, "2")){
-                    break;
-                } else if (choice.equals("0")) {
-                    System.exit(0);
-                } else {
-                    System.out.println(Color.ANSI_RED+"⚠️ Choix Invalide!!!"+Color.ANSI_RESET);
+            if(isConnect && !isSessionExpired){
+                choice = "2";
+                successConnect = true;
+            }
+            else{
+
+                while (true){
+                    System.out.println(Color.ANSI_BLUE +"--- Choisissez Une Option ---" + Color.ANSI_RESET);
+                    System.out.println("1- S'inscrire");
+                    System.out.println("2- Se Connecter");
+                    System.out.println("0- Quitter L'application ⚠️ !!!");
+                    choice = scanner.next();
+                    if(Objects.equals(choice, "1") || Objects.equals(choice, "2")){
+                        break;
+                    } else if (choice.equals("0")) {
+                        System.exit(0);
+                    } else {
+                        System.out.println(Color.ANSI_RED+"⚠️ Choix Invalide!!!"+Color.ANSI_RESET);
+                    }
                 }
             }
+
 
             // Si l'utilisateur choisit Le choix 1, il s'inscrit
             if (choice.equals("1")) {
@@ -51,11 +67,24 @@ public class Main {
             // Ici On a le cas ou l'utilisateur se connecte
             if(choice.equals("2")){
                 String callback = "1203";
-                System.out.println(Color.ANSI_BLUE + "\n-------------Page de Connexion------------" + Color.ANSI_RESET);
+
+
                 // Ici L'utilisateur Essaie De se Connecter si il echoue, il reprend
                 label:
                 while (true){
-                    int idPassager = ConnexionPassager();
+                    if(!successConnect){
+                        System.out.println(Color.ANSI_BLUE + "\n-------------Page de Connexion------------" + Color.ANSI_RESET);
+                    }
+                    int idPassager = successConnect ? idP : ConnexionPassager();
+                    // Sauvegarde de la session de l'utilisateur
+                    FileOperations.writeIntegerToFile("session.txt", idPassager);
+                    DateTimeOperations.saveCurrentDateTime();
+
+                    if(successConnect){
+                        Passager.BienvenuePassagerById(Connexion.con, idPassager);
+                    }
+
+
                     if(idPassager != -1){
 
                         // --------------MAIN--------------------------
@@ -76,16 +105,13 @@ public class Main {
                                 if(Objects.equals(choice1, "1") || Objects.equals(choice1, "2")){
                                     break;
                                 } else if (choice1.equals("0")) {
-                                    break;
+                                    FileOperations.writeIntegerToFile("session.txt", -1);
+                                    continue debut;
                                 } else {
                                     System.out.println(Color.ANSI_RED+"⚠️ Choix Invalide!!!"+Color.ANSI_RESET);
                                 }
                             }
                             switch (choice1) {
-                                case "0":
-                                    break label;
-
-
                                 // En fonction des choix effectuer Le Workflow Correspondant
                                 case "1":
                                     Reservation r = new Reservation();
@@ -283,7 +309,7 @@ public class Main {
         ArrayList<String> liste = new ArrayList<>();
         if (IdPassager != -1) {
             String listeReservationIdPersonne = "SELECT r.idReservation, r.dateReservation, r.nombreDePassager, i.statut, i.id, " +
-                    "i.nomPassagerEtranger, i.prenomPassagerEtranger, i.numeroPasseport,i.idVol, v.idVol, v.immatriculation, " +
+                    "i.nomPassagerEtranger, i.prenomPassagerEtranger, i.numeroPasseport,i.idVol,i.numeroDePlace, v.idVol, v.immatriculation, " +
                     "v.villeDeDepart, v.villeDArrive, v.dateDeDepart, v.dateDArrive, v.nombreDEscale, i.tarif, " +
                     "c.idCategorie, c.nom AS nomCategorie FROM reservation r NATURAL JOIN infopassager i NATURAL JOIN " +
                     "categorie c JOIN vol v on v.idVol=i.idVol WHERE r.idPassager ="+ IdPassager;
@@ -294,9 +320,10 @@ public class Main {
             System.out.print("      idReservation");
             System.out.print("      dateReservation");
             System.out.print("      Statut");
-            System.out.print("      nomPassagerEtranger");
-            System.out.print("      prenomPassagerEtranger");
+            System.out.print("          nomPassager");
+            System.out.print("          prenomPassager");
             System.out.print("      numeroPasseport");
+            System.out.print("      numeroDePlace");
             System.out.print("      immatriculation Avion");
             System.out.print("      villeDeDepart");
             System.out.print("      villeDArrive");
@@ -327,6 +354,7 @@ public class Main {
                         String villeDeDepart = resultSet.getString("v.villeDeDepart");
                         String villeDArrive = resultSet.getString("v.villeDArrive");
                         String dateDeDepart = resultSet.getString("v.dateDeDepart");
+                        int numeroDePlace = resultSet.getInt("i.numeroDePlace");
                         int nombreDEscale = resultSet.getInt("v.nombreDEscale");
                         int tarif = resultSet.getInt("i.tarif");
                         String nomCategorie = resultSet.getString("nomCategorie");
@@ -335,17 +363,18 @@ public class Main {
                         System.out.print(ajoutEspace(String.valueOf(id)));
                         System.out.print("     "+ajoutEspace(String.valueOf(idReservation)));
                         System.out.print("      "+dateReservation);
-                        System.out.print(Color.ANSI_CYAN+"          "+ajoutEspace(statut)+Color.ANSI_RESET);
+                        System.out.print(Color.ANSI_CYAN+"         "+ajoutEspace(statut)+Color.ANSI_RESET);
                         System.out.print("         "+ajoutEspace(nomPassagerEtranger));
-                        System.out.print("               "+ajoutEspace(prenomPassagerEtranger));
-                        System.out.print("                  "+ajoutEspace(numeroPasseport));
+                        System.out.print("            "+ajoutEspace(prenomPassagerEtranger));
+                        System.out.print("         "+ajoutEspace(numeroPasseport));
+                        System.out.print("            "+ajoutEspace(String.valueOf(numeroDePlace)));
                         System.out.print("             "+ajoutEspace(immatriculation));
-                        System.out.print("                  "+ajoutEspace(villeDeDepart));
-                        System.out.print("         "+ajoutEspace(villeDArrive));
+                        System.out.print("                "+ajoutEspace(villeDeDepart));
+                        System.out.print("            "+ajoutEspace(villeDArrive));
                         System.out.print("       "+dateDeDepart);
                         System.out.print("             "+nombreDEscale);
                         System.out.print("             "+tarif);
-                        System.out.println("       "+ajoutEspace(nomCategorie));
+                        System.out.println("         "+ajoutEspace(nomCategorie));
                     }
 
                 }

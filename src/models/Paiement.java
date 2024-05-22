@@ -106,7 +106,7 @@ public class Paiement {
             }
 
 
-            System.out.println(Color.ANSI_YELLOW+"Le montant " + montant + " Sera retire de votre compte."+Color.ANSI_RESET);
+            System.out.println(Color.ANSI_YELLOW+"Le montant " + montant + "$ Sera retire de votre compte."+Color.ANSI_RESET);
             p.setMontant(montant);
 
             p.setIdReservation(idReservation);

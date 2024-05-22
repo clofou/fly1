@@ -233,7 +233,24 @@ public class Passager extends Personne {
                 String nom = resultSet.getString("nom");
                 String prenom = resultSet.getString("prenom");
 
-                System.out.println("\nBIENBENUE,"+ Color.ANSI_GREEN + prenom.toUpperCase() + " " + nom.toUpperCase()+ Color.ANSI_RESET+"\n");
+                System.out.println("\nBIENVENUE,"+ Color.ANSI_GREEN + prenom.toUpperCase() + " " + nom.toUpperCase()+ Color.ANSI_RESET+"\n");
+            }
+        }
+    }
+    public static void BienvenuePassagerById(Connection connection,int id) throws SQLException{
+        // Préparer la requête SQL
+        String sql = "SELECT nom, prenom FROM Personne WHERE idPersonne="+id;
+        int idPersonne = 0;
+        try (Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(sql)) {
+
+            // Vérifier si le ResultSet contient des données
+            if (resultSet.next()) {
+                // Récupérer la valeur unique
+                String nom = resultSet.getString("nom");
+                String prenom = resultSet.getString("prenom");
+
+                System.out.println("\nBIENVENUE,"+ Color.ANSI_GREEN + prenom.toUpperCase() + " " + nom.toUpperCase()+ Color.ANSI_RESET+"\n");
             }
         }
     }
